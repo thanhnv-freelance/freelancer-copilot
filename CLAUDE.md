@@ -34,12 +34,13 @@ pnpm lint            # ESLint
 pnpm test            # Vitest unit tests
 ```
 
-Database (Drizzle — prefix with `dotenv -e .env.local --`):
+Database (Drizzle — scripts load `.env` then `.env.local`):
 ```bash
-pnpm db:generate     # generate migrations
-pnpm db:migrate      # apply migrations
-pnpm db:push:dev     # push schema directly (dev only)
-pnpm db:studio       # Drizzle Studio UI
+pnpm db:create-schema  # create the freelancer_copilot schema (run once per environment)
+pnpm db:push:dev       # push schema directly (dev only)
+pnpm db:generate       # generate migrations
+pnpm db:migrate        # apply migrations
+pnpm db:studio         # Drizzle Studio UI
 ```
 
 ## Architecture

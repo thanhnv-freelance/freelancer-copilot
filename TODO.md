@@ -2,12 +2,12 @@
 
 ## Phase 1 — Foundation
 
-* [ ] Initialize Next.js 15 project with pnpm
-* [ ] Configure TailwindCSS v4
-* [ ] Set up Drizzle ORM with `postgres` driver
-* [ ] Connect Neon PostgreSQL database
-* [ ] Configure NextAuth v5
-* [ ] Set up Vercel AI SDK with Anthropic provider
+* [x] Initialize Next.js 15 project with pnpm
+* [x] Configure TailwindCSS v4
+* [x] Set up Drizzle ORM with `postgres` driver (`lib/db/schema.ts`, `lib/db/index.ts`, `drizzle.config.ts`)
+* [x] Connect Neon PostgreSQL database (`freelancer_copilot` schema created and tables pushed)
+* [x] Configure NextAuth v5 (`auth.ts`, `middleware.ts`, login page)
+* [x] Set up Vercel AI SDK with Anthropic provider (`lib/ai/index.ts`)
 * [ ] Deploy initial skeleton to Vercel
 
 ---

@@ -6,7 +6,15 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm add:*)",
       "Bash(pnpm approve-builds:*)",
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm exec:*)",
+      "Bash(dotenv:*)",
+      "Bash(pnpm:*)",
+      "Bash(openssl rand:*)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(curl -sI http://localhost:3000/)",
+      "Bash(curl -sI http://localhost:3000/login)",
+      "Bash(curl -sI http://localhost:3000/dashboard)"
     ]
   }
 }
