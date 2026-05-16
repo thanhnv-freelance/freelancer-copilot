@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+@AGENTS.md
+
 ## Project Overview
 
 Freelancer Copilot is a Next.js fullstack platform to help freelancers analyze job opportunities, score project fit, generate AI-assisted proposals, and track applications. Initial focus is Upwork workflow support.
