@@ -37,11 +37,14 @@
 
 ## Phase 4 — AI Integration
 
-* [ ] Set up AI SDK streaming in `lib/ai/`
-* [ ] Build proposal generation prompt template
-* [ ] Build requirement summarization prompt
-* [ ] Add streaming proposal UI (`useCompletion` hook)
-* [ ] Add AI risk analysis output
+* [x] Set up AI SDK streaming in `lib/ai/` (Anthropic primary, `toTextStreamResponse`)
+* [x] Build proposal generation prompt template (`lib/ai/prompts/proposal.ts`)
+* [x] Build job analysis prompt (`lib/ai/prompts/analysis.ts`)
+* [x] `POST /api/jobs/[id]/proposal` — streaming proposal route
+* [x] `POST /api/jobs/[id]/analyze` — streaming analysis route
+* [x] `ProposalPanel` — streaming UI with `useCompletion`, copy to clipboard
+* [x] `AnalysisPanel` — streaming UI with section rendering (requirements, red flags, selling points, questions)
+* [x] Installed `@ai-sdk/react` for `useCompletion` hook
 
 ---
 

@@ -14,7 +14,10 @@
       "Bash(pkill -f \"next dev\")",
       "Bash(curl -sI http://localhost:3000/)",
       "Bash(curl -sI http://localhost:3000/login)",
-      "Bash(curl -sI http://localhost:3000/dashboard)"
+      "Bash(curl -sI http://localhost:3000/dashboard)",
+      "Bash(node -e \"const ai = require\\(''''ai''''\\); console.log\\(Object.keys\\(ai\\).filter\\(k => k.includes\\(''''stream''''\\) || k.includes\\(''''Stream''''\\) || k.includes\\(''''Completion''''\\) || k.includes\\(''''Chat''''\\)\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; pkg=json.load\\(sys.stdin\\); [print\\(k\\) for k in pkg.get\\(''''exports'''',{}\\).keys\\(\\)]\")",
+      "Bash(node:*)"
     ]
   }
 }

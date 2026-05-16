@@ -2,6 +2,8 @@ import { getJobById } from "@/services/job.service"
 import { getScoreForJob } from "@/services/scoring.service"
 import { StatusActions } from "@/components/jobs/status-actions"
 import { ScorePanel } from "@/components/jobs/score-panel"
+import { AnalysisPanel } from "@/components/jobs/analysis-panel"
+import { ProposalPanel } from "@/components/jobs/proposal-panel"
 import { formatBudget, formatDate } from "@/lib/utils/format"
 import { notFound } from "next/navigation"
 import Link from "next/link"
@@ -92,7 +94,15 @@ export default async function JobDetailPage({
       </div>
 
       {/* Score */}
-      <ScorePanel jobId={job.id} initial={existingScore} />
+      <div className="mb-4">
+        <ScorePanel jobId={job.id} initial={existingScore} />
+      </div>
+
+      {/* AI panels */}
+      <div className="space-y-4 mb-4">
+        <AnalysisPanel jobId={job.id} />
+        <ProposalPanel jobId={job.id} />
+      </div>
 
       {/* Client info */}
       {job.clientName && (
