@@ -25,10 +25,13 @@
 
 ## Phase 3 — Scoring Engine
 
-* [ ] Define scoring rules and weights in `lib/scoring/`
-* [ ] Implement `ScoringService` (pure function, no DB dependency)
-* [ ] Create `scoring_results` table schema
-* [ ] Build score visualization UI (score badge + reasoning list)
+* [x] Define scoring rules and weights in `lib/scoring/config.ts`
+* [x] Implement `scoreJob` pure function in `lib/scoring/engine.ts`
+* [x] Create `scoring_results` table schema (already in Phase 1)
+* [x] `services/scoring.service.ts` — save and retrieve scores
+* [x] `POST /api/jobs/[id]/score` + `GET /api/jobs/[id]/score`
+* [x] Score badge + breakdown UI (`ScorePanel` on job detail page)
+* [x] Unit tests for scoring engine (7 passing)
 
 ---
 

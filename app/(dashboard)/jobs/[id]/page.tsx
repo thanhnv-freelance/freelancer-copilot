@@ -1,5 +1,7 @@
 import { getJobById } from "@/services/job.service"
+import { getScoreForJob } from "@/services/scoring.service"
 import { StatusActions } from "@/components/jobs/status-actions"
+import { ScorePanel } from "@/components/jobs/score-panel"
 import { formatBudget, formatDate } from "@/lib/utils/format"
 import { notFound } from "next/navigation"
 import Link from "next/link"
@@ -19,7 +21,10 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const job = await getJobById(id)
+  const [job, existingScore] = await Promise.all([
+    getJobById(id),
+    getScoreForJob(id),
+  ])
   if (!job) notFound()
 
   const skills = (job.skills as string[]) ?? []
@@ -85,6 +90,9 @@ export default async function JobDetailPage({
           {job.description}
         </pre>
       </div>
+
+      {/* Score */}
+      <ScorePanel jobId={job.id} initial={existingScore} />
 
       {/* Client info */}
       {job.clientName && (
