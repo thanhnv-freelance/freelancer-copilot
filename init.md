@@ -54,19 +54,19 @@ Long-term vision:
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js |
-| Styling | TailwindCSS |
+| Frontend | Next.js 15 (App Router, Turbopack) |
+| Styling | TailwindCSS v4 |
 | Backend API | Next.js API Routes |
 | Database | PostgreSQL (Neon) |
 | ORM | Drizzle ORM |
-| Authentication | NextAuth |
-| AI Integration | OpenAI API |
+| Authentication | NextAuth v5 |
+| AI Integration | Vercel AI SDK (`ai`) + `@ai-sdk/anthropic` + `@ai-sdk/openai` |
 | Hosting | Vercel |
 | Scheduler | Vercel Cron |
-| State Management | Zustand |
 | Validation | Zod |
-| HTTP Client | Axios |
 | Charts | Recharts |
+| Package Manager | pnpm |
+| Testing | Vitest (unit) + Playwright (E2E) |
 | Deployment | Vercel |
 | CI/CD | GitHub Actions |
 
@@ -94,6 +94,16 @@ Advantages:
 - simpler than Prisma
 - excellent SQL visibility
 - low complexity
+
+---
+
+## Why Vercel AI SDK
+
+Advantages:
+- provider-agnostic: swap between Claude, OpenAI, or local Ollama by changing only `baseURL` and model name
+- first-class streaming support via `useChat` / `useCompletion` hooks — no custom streaming logic needed
+- handles loading, error, and done state out of the box — no global state manager required for AI interactions
+- primary model: Claude (`@ai-sdk/anthropic`); fallback: OpenAI (`@ai-sdk/openai`)
 
 ---
 
@@ -359,9 +369,9 @@ Goals
 proposal generation
 requirement summarization
 Tasks
-integrate OpenAI API
+integrate Vercel AI SDK with Anthropic (Claude) provider
 build prompt templates
-add AI suggestion UI
+add AI suggestion UI with streaming
 Phase 5 — Analytics
 Goals
 freelancing metrics dashboard
@@ -392,14 +402,15 @@ Return freelancing analytics.
 
 Environment Variables
 DATABASE_URL=
+ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=
 Local Development
 Install dependencies
-npm install
+pnpm install
 Run locally
-npm run dev
+pnpm dev
 Deployment
 Frontend + Backend
 
@@ -471,9 +482,9 @@ public portfolio showcase
 Initial Setup Commands
 npx create-next-app@latest freelancer-copilot
 Install Dependencies
-npm install drizzle-orm pg zod axios openai zustand recharts
+pnpm add drizzle-orm postgres zod ai @ai-sdk/anthropic @ai-sdk/openai next-auth recharts
 Dev Dependencies
-npm install -D drizzle-kit tailwindcss eslint prettier
+pnpm add -D drizzle-kit tailwindcss @tailwindcss/postcss eslint prettier vitest @playwright/test tsx dotenv-cli
 Recommended First Milestone
 
 Build:

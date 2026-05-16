@@ -1,0 +1,77 @@
+# TODO
+
+## Phase 1 — Foundation
+
+* [ ] Initialize Next.js 15 project with pnpm
+* [ ] Configure TailwindCSS v4
+* [ ] Set up Drizzle ORM with `postgres` driver
+* [ ] Connect Neon PostgreSQL database
+* [ ] Configure NextAuth v5
+* [ ] Set up Vercel AI SDK with Anthropic provider
+* [ ] Deploy initial skeleton to Vercel
+
+---
+
+## Phase 2 — Job Management
+
+* [ ] Create `jobs` table schema (Drizzle)
+* [ ] Build job dashboard UI (list + filter)
+* [ ] Implement manual job import (paste from Upwork)
+* [ ] Add job detail page
+* [ ] Add filter: budget, skills, proposal count, payment verified
+* [ ] Add bookmark / viewed tracking
+
+---
+
+## Phase 3 — Scoring Engine
+
+* [ ] Define scoring rules and weights in `lib/scoring/`
+* [ ] Implement `ScoringService` (pure function, no DB dependency)
+* [ ] Create `scoring_results` table schema
+* [ ] Build score visualization UI (score badge + reasoning list)
+
+---
+
+## Phase 4 — AI Integration
+
+* [ ] Set up AI SDK streaming in `lib/ai/`
+* [ ] Build proposal generation prompt template
+* [ ] Build requirement summarization prompt
+* [ ] Add streaming proposal UI (`useCompletion` hook)
+* [ ] Add AI risk analysis output
+
+---
+
+## Phase 5 — Application Tracker
+
+* [ ] Create `applications` table schema
+* [ ] Build application tracker UI (status board)
+* [ ] Add proposal status lifecycle (sent → interview → won/lost)
+* [ ] Dashboard metrics: response rate, win rate, revenue
+
+---
+
+## Phase 6 — Analytics
+
+* [ ] Build analytics page with Recharts
+* [ ] Weekly KPI summary: proposals sent, response rate, win rate
+* [ ] Average hourly rate calculation
+* [ ] Revenue tracking over time
+
+---
+
+## Infrastructure
+
+* [ ] Add `.env.example`
+* [ ] Set up GitHub Actions CI (install → lint → test → build)
+* [ ] Configure Vercel Cron for scheduled tasks
+
+---
+
+## Future
+
+* [ ] Reusable assets library (proposal templates, intro messages)
+* [ ] AI opportunity ranking via embeddings
+* [ ] Client risk detection (hire rate, unclear scope signals)
+* [ ] Proposal analytics (length, keywords, success correlation)
+* [ ] Multi-platform support (Freelancer, Fiverr, LinkedIn)
