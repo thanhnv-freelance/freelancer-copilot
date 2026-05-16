@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { Job } from "@/lib/db/schema"
 import { formatBudget, formatDate } from "@/lib/utils/format"
+import { getPlatformLabel } from "@/lib/constants/platforms"
 
 const STATUS_STYLES: Record<string, string> = {
   new: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
@@ -44,11 +45,16 @@ export function JobCard({ job }: { job: Job }) {
         </div>
 
         <div className="shrink-0 text-right space-y-1.5">
-          <span
-            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[job.status] ?? STATUS_STYLES.new}`}
-          >
-            {job.status}
-          </span>
+          <div className="flex items-center justify-end gap-1.5">
+            <span className="px-2 py-0.5 rounded-full bg-subtle text-xs text-faint">
+              {getPlatformLabel(job.source)}
+            </span>
+            <span
+              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLES[job.status] ?? STATUS_STYLES.new}`}
+            >
+              {job.status}
+            </span>
+          </div>
           <p className="text-sm font-medium text-foreground">
             {formatBudget(job)}
           </p>

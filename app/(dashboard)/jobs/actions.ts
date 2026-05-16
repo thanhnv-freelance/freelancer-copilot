@@ -29,6 +29,7 @@ export async function importJobAction(formData: FormData) {
     clientHireRate: clientHireRate || null,
     clientTotalSpent: clientTotalSpent || null,
     paymentVerified: formData.get("paymentVerified") === "on",
+    source: (formData.get("source") as string) || "upwork",
     url: (formData.get("url") as string) || null,
     status: "new",
   })

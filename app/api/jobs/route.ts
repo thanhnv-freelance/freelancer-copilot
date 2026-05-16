@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
   const result = await getJobs({
     status: searchParams.get("status") ?? undefined,
     budgetType: searchParams.get("budgetType") ?? undefined,
+    source: searchParams.get("source") ?? undefined,
     search: searchParams.get("search") ?? undefined,
   })
 

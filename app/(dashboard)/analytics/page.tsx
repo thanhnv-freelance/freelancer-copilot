@@ -2,6 +2,7 @@ import { getAnalyticsData } from "@/services/analytics.service"
 import {
   ActivityChart,
   FunnelChart,
+  PlatformChart,
   RevenueChart,
 } from "@/components/analytics/analytics-charts"
 
@@ -39,7 +40,7 @@ function ChartCard({
 }
 
 export default async function AnalyticsPage() {
-  const { kpis, weekly, funnel } = await getAnalyticsData()
+  const { kpis, weekly, funnel, platformBreakdown } = await getAnalyticsData()
 
   const kpiCards = [
     { label: "Proposals Sent", value: String(kpis.sent) },
@@ -83,6 +84,50 @@ export default async function AnalyticsPage() {
         <ChartCard title="Revenue Over Time">
           <RevenueChart data={weekly} />
         </ChartCard>
+      </section>
+
+      {/* Platform breakdown */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ChartCard title="Platform Performance (Sent vs Won)">
+          <PlatformChart data={platformBreakdown} />
+        </ChartCard>
+
+        {/* Platform win-rate table */}
+        <div className="rounded-xl border border-border bg-card p-5">
+          <h2 className="text-sm font-medium text-foreground mb-4">
+            Platform Win Rates
+          </h2>
+          {platformBreakdown.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No data yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-xs text-muted-foreground border-b border-border">
+                  <th className="text-left pb-2 font-medium">Platform</th>
+                  <th className="text-right pb-2 font-medium">Sent</th>
+                  <th className="text-right pb-2 font-medium">Won</th>
+                  <th className="text-right pb-2 font-medium">Win Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {platformBreakdown.map((row) => (
+                  <tr key={row.platform} className="border-b border-border last:border-0">
+                    <td className="py-2 text-foreground">{row.platform}</td>
+                    <td className="py-2 text-right tabular-nums text-muted-foreground">{row.sent}</td>
+                    <td className="py-2 text-right tabular-nums text-muted-foreground">{row.won}</td>
+                    <td className="py-2 text-right tabular-nums font-medium">
+                      {row.winRate > 0 ? (
+                        <span className="text-green-600 dark:text-green-400">{row.winRate}%</span>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </section>
 
       {/* Funnel */}

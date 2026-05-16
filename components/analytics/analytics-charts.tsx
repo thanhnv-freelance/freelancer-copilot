@@ -12,7 +12,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import type { WeeklyPoint, FunnelPoint } from "@/services/analytics.service"
+import type { WeeklyPoint, FunnelPoint, PlatformPoint } from "@/services/analytics.service"
+import { Legend } from "recharts"
 
 const TOOLTIP_STYLE = {
   fontSize: 12,
@@ -143,6 +144,57 @@ export function RevenueChart({ data }: { data: WeeklyPoint[] }) {
 }
 
 const FUNNEL_COLORS = ["#6366f1", "#f59e0b", "#22c55e"]
+
+export function PlatformChart({ data }: { data: PlatformPoint[] }) {
+  if (data.length === 0) {
+    return (
+      <div className="h-48">
+        <Empty message="No multi-platform data yet." />
+      </div>
+    )
+  }
+
+  const height = Math.max(192, data.length * 52)
+
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
+        >
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="var(--border)"
+            horizontal={false}
+          />
+          <XAxis
+            type="number"
+            allowDecimals={false}
+            tick={TICK_STYLE}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            type="category"
+            dataKey="platform"
+            tick={TICK_STYLE}
+            tickLine={false}
+            axisLine={false}
+            width={80}
+          />
+          <Tooltip contentStyle={TOOLTIP_STYLE} cursor={CURSOR_STYLE} />
+          <Legend
+            wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }}
+          />
+          <Bar dataKey="sent" name="Sent" fill="#6366f1" radius={[0, 3, 3, 0]} />
+          <Bar dataKey="won" name="Won" fill="#22c55e" radius={[0, 3, 3, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
 
 export function FunnelChart({ data }: { data: FunnelPoint[] }) {
   const hasData = data.some((d) => d.count > 0)

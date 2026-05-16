@@ -1,5 +1,6 @@
 import { getJobs } from "@/services/job.service"
 import { JobCard } from "@/components/jobs/job-card"
+import { PLATFORMS } from "@/lib/constants/platforms"
 import Link from "next/link"
 
 const STATUS_FILTERS = [
@@ -16,22 +17,29 @@ const BUDGET_FILTERS = [
   { value: "hourly", label: "Hourly" },
 ]
 
+const SOURCE_FILTERS = [
+  { value: "all", label: "All Platforms" },
+  ...PLATFORMS,
+]
+
 export default async function JobsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; budgetType?: string }>
+  searchParams: Promise<{ status?: string; budgetType?: string; source?: string }>
 }) {
   const params = await searchParams
   const activeStatus = params.status ?? "all"
   const activeBudget = params.budgetType ?? "all"
+  const activeSource = params.source ?? "all"
 
   const jobs = await getJobs({
     status: activeStatus,
     budgetType: activeBudget,
+    source: activeSource,
   })
 
   function buildUrl(overrides: Record<string, string>) {
-    const next = { status: activeStatus, budgetType: activeBudget, ...overrides }
+    const next = { status: activeStatus, budgetType: activeBudget, source: activeSource, ...overrides }
     const qs = Object.entries(next)
       .filter(([, v]) => v !== "all")
       .map(([k, v]) => `${k}=${v}`)
@@ -80,6 +88,21 @@ export default async function JobsPage({
               href={buildUrl({ budgetType: value })}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 activeBudget === value
+                  ? "bg-foreground text-background"
+                  : "bg-subtle text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {SOURCE_FILTERS.map(({ value, label }) => (
+            <Link
+              key={value}
+              href={buildUrl({ source: value })}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                activeSource === value
                   ? "bg-foreground text-background"
                   : "bg-subtle text-muted-foreground hover:text-foreground"
               }`}

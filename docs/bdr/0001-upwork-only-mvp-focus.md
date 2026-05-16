@@ -1,7 +1,8 @@
 # BDR-0001: Upwork-Only Focus for MVP
 
-- **Status**: Accepted
+- **Status**: Superseded by [BDR-0003](./0003-multi-channel-platform-strategy.md)
 - **Date**: 2026-05-17
+- **Superseded**: 2026-05-17
 
 ## Context
 

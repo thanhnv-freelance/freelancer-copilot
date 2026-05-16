@@ -22,6 +22,7 @@ freelancer-copilot/
 ├── components/        # Reusable UI components
 ├── lib/               # Domain logic (framework-agnostic)
 │   ├── ai/
+│   ├── constants/
 │   ├── db/
 │   ├── scoring/
 │   └── parser/

@@ -6,6 +6,7 @@ import type { NewJob } from "@/lib/db/schema"
 export type JobFilters = {
   status?: string
   budgetType?: string
+  source?: string
   search?: string
 }
 
@@ -17,6 +18,9 @@ export async function getJobs(filters?: JobFilters) {
   }
   if (filters?.budgetType && filters.budgetType !== "all") {
     conditions.push(eq(jobs.budgetType, filters.budgetType))
+  }
+  if (filters?.source && filters.source !== "all") {
+    conditions.push(eq(jobs.source, filters.source))
   }
   if (filters?.search) {
     conditions.push(

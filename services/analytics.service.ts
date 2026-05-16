@@ -1,8 +1,16 @@
 import { db } from "@/lib/db"
-import { applications } from "@/lib/db/schema"
+import { applications, jobs } from "@/lib/db/schema"
+import { eq } from "drizzle-orm"
+import { getPlatformLabel } from "@/lib/constants/platforms"
 
 export type WeeklyPoint = { week: string; count: number; revenue: number }
 export type FunnelPoint = { status: string; count: number }
+export type PlatformPoint = {
+  platform: string
+  sent: number
+  won: number
+  winRate: number
+}
 
 export type AnalyticsData = {
   kpis: {
@@ -14,6 +22,7 @@ export type AnalyticsData = {
   }
   weekly: WeeklyPoint[]
   funnel: FunnelPoint[]
+  platformBreakdown: PlatformPoint[]
 }
 
 function getLast12Weeks() {
@@ -86,6 +95,34 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     { status: "Won", count: won },
   ]
 
+  // Per-platform breakdown (join applications → jobs to get source)
+  const appsWithSource = await db
+    .select({
+      status: applications.status,
+      source: jobs.source,
+    })
+    .from(applications)
+    .innerJoin(jobs, eq(applications.jobId, jobs.id))
+
+  const platformMap = new Map<string, { sent: number; won: number }>()
+  for (const row of appsWithSource) {
+    if (row.status === "draft") continue
+    const entry = platformMap.get(row.source) ?? { sent: 0, won: 0 }
+    entry.sent++
+    if (row.status === "won") entry.won++
+    platformMap.set(row.source, entry)
+  }
+  const platformBreakdown: PlatformPoint[] = Array.from(
+    platformMap.entries()
+  )
+    .map(([source, { sent: pSent, won: pWon }]) => ({
+      platform: getPlatformLabel(source),
+      sent: pSent,
+      won: pWon,
+      winRate: pSent > 0 ? Math.round((pWon / pSent) * 100) : 0,
+    }))
+    .sort((a, b) => b.sent - a.sent)
+
   return {
     kpis: {
       sent,
@@ -96,5 +133,6 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     },
     weekly,
     funnel,
+    platformBreakdown,
   }
 }

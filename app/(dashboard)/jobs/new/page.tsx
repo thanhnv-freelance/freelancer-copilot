@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { importJobAction } from "@/app/(dashboard)/jobs/actions"
+import { PLATFORMS } from "@/lib/constants/platforms"
 
 const inputClass =
   "w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none focus:border-foreground focus:ring-1 focus:ring-foreground"
@@ -61,11 +62,20 @@ export default function NewJobPage() {
             required
             rows={10}
             className={inputClass}
-            placeholder="Paste the full job description from Upwork..."
+            placeholder="Paste the full job description..."
           />
         </Field>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Field label="Platform" name="source">
+            <select id="source" name="source" className={inputClass}>
+              {PLATFORMS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label="Budget Type" name="budgetType">
             <select id="budgetType" name="budgetType" className={inputClass}>
               <option value="fixed">Fixed</option>
@@ -162,13 +172,13 @@ export default function NewJobPage() {
           </label>
         </div>
 
-        <Field label="Upwork URL" name="url">
+        <Field label="Job URL" name="url">
           <input
             id="url"
             type="url"
             name="url"
             className={inputClass}
-            placeholder="https://www.upwork.com/jobs/~..."
+            placeholder="https://..."
           />
         </Field>
 

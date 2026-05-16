@@ -74,10 +74,20 @@
 
 ---
 
+## Gap Fixes (from strategy review, 2026-05-17)
+
+* [x] Multi-platform source field exposed in job import form (Upwork, Contra, LinkedIn, Wellfound, Braintrust, Arc.dev, Other)
+* [x] Platform filter on jobs list
+* [x] Platform badge on job cards
+* [x] Per-platform analytics: sent vs won + win rate breakdown (see BDR-0003, ADR-0004)
+
+---
+
 ## Future
 
 * [ ] Reusable assets library (proposal templates, intro messages)
 * [ ] AI opportunity ranking via embeddings
 * [ ] Client risk detection (hire rate, unclear scope signals)
 * [ ] Proposal analytics (length, keywords, success correlation)
-* [ ] Multi-platform support (Freelancer, Fiverr, LinkedIn)
+* [ ] Per-platform scoring weight calibration (once data accumulates — see ADR-0004)
+* [ ] Inbound lead tracking (LinkedIn DMs, referrals — distinct from job board source)
