@@ -6,20 +6,20 @@
 * [x] Configure TailwindCSS v4
 * [x] Set up Drizzle ORM with `postgres` driver (`lib/db/schema.ts`, `lib/db/index.ts`, `drizzle.config.ts`)
 * [x] Connect Neon PostgreSQL database (`freelancer_copilot` schema created and tables pushed)
-* [x] Configure NextAuth v5 (`auth.ts`, `middleware.ts`, login page)
+* [x] Configure NextAuth v5 (`auth.ts`, `proxy.ts`, login page)
 * [x] Set up Vercel AI SDK with Anthropic provider (`lib/ai/index.ts`)
-* [ ] Deploy initial skeleton to Vercel
+* [x] Deploy initial skeleton to Vercel
 
 ---
 
 ## Phase 2 — Job Management
 
-* [ ] Create `jobs` table schema (Drizzle)
-* [ ] Build job dashboard UI (list + filter)
-* [ ] Implement manual job import (paste from Upwork)
-* [ ] Add job detail page
-* [ ] Add filter: budget, skills, proposal count, payment verified
-* [ ] Add bookmark / viewed tracking
+* [x] Create `jobs` table schema (Drizzle)
+* [x] Build job dashboard UI (list + filter)
+* [x] Implement manual job import (paste from Upwork)
+* [x] Add job detail page
+* [x] Add filter: budget type, status
+* [x] Add bookmark / skip / applied status tracking
 
 ---
 
@@ -62,7 +62,7 @@
 
 ## Infrastructure
 
-* [ ] Add `.env.example`
+* [x] Add `.env.example`
 * [ ] Set up GitHub Actions CI (install → lint → test → build)
 * [ ] Configure Vercel Cron for scheduled tasks
 
