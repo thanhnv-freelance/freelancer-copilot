@@ -59,10 +59,10 @@
 
 ## Phase 6 — Analytics
 
-* [ ] Build analytics page with Recharts
-* [ ] Weekly KPI summary: proposals sent, response rate, win rate
-* [ ] Average hourly rate calculation
-* [ ] Revenue tracking over time
+* [x] Build analytics page with Recharts
+* [x] Weekly KPI summary: proposals sent, response rate, win rate
+* [x] Average hourly rate calculation
+* [x] Revenue tracking over time
 
 ---
 
