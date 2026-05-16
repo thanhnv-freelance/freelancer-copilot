@@ -1,9 +1,11 @@
 import { getJobById } from "@/services/job.service"
 import { getScoreForJob } from "@/services/scoring.service"
+import { getApplicationByJobId } from "@/services/application.service"
 import { StatusActions } from "@/components/jobs/status-actions"
 import { ScorePanel } from "@/components/jobs/score-panel"
 import { AnalysisPanel } from "@/components/jobs/analysis-panel"
 import { ProposalPanel } from "@/components/jobs/proposal-panel"
+import { ApplicationPanel } from "@/components/jobs/application-panel"
 import { formatBudget, formatDate } from "@/lib/utils/format"
 import { notFound } from "next/navigation"
 import Link from "next/link"
@@ -23,9 +25,10 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [job, existingScore] = await Promise.all([
+  const [job, existingScore, existingApplication] = await Promise.all([
     getJobById(id),
     getScoreForJob(id),
+    getApplicationByJobId(id),
   ])
   if (!job) notFound()
 
@@ -102,6 +105,7 @@ export default async function JobDetailPage({
       <div className="space-y-4 mb-4">
         <AnalysisPanel jobId={job.id} />
         <ProposalPanel jobId={job.id} />
+        <ApplicationPanel jobId={job.id} initial={existingApplication} />
       </div>
 
       {/* Client info */}

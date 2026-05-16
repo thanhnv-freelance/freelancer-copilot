@@ -50,10 +50,10 @@
 
 ## Phase 5 — Application Tracker
 
-* [ ] Create `applications` table schema
-* [ ] Build application tracker UI (status board)
-* [ ] Add proposal status lifecycle (sent → interview → won/lost)
-* [ ] Dashboard metrics: response rate, win rate, revenue
+* [x] Create `applications` table schema
+* [x] Build application tracker UI (status board)
+* [x] Add proposal status lifecycle (sent → interview → won/lost)
+* [x] Dashboard metrics: response rate, win rate, revenue
 
 ---
 
