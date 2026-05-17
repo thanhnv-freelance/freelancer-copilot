@@ -1,11 +1,47 @@
 "use client"
 
+import { useState } from "react"
 import { useCompletion } from "@ai-sdk/react"
 
-export function ProposalPanel({ jobId }: { jobId: string }) {
+export function ProposalPanel({
+  jobId,
+  appId: initialAppId,
+}: {
+  jobId: string
+  appId?: string
+}) {
   const { completion, complete, isLoading, error } = useCompletion({
     api: `/api/jobs/${jobId}/proposal`,
   })
+  const [saving, setSaving] = useState(false)
+  const [savedAppId, setSavedAppId] = useState<string | undefined>(initialAppId)
+  const [saveMsg, setSaveMsg] = useState<"saved" | "error" | null>(null)
+
+  async function saveToApplication() {
+    setSaving(true)
+    setSaveMsg(null)
+    try {
+      if (savedAppId) {
+        await fetch(`/api/applications/${savedAppId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ proposalText: completion }),
+        })
+      } else {
+        const res = await fetch("/api/applications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jobId, proposalText: completion, status: "draft" }),
+        })
+        const created = await res.json()
+        setSavedAppId(created.id)
+      }
+      setSaveMsg("saved")
+    } catch {
+      setSaveMsg("error")
+    }
+    setSaving(false)
+  }
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">
@@ -29,12 +65,27 @@ export function ProposalPanel({ jobId }: { jobId: string }) {
           <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
             {completion}
           </pre>
-          <button
-            onClick={() => navigator.clipboard.writeText(completion)}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Copy to clipboard
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigator.clipboard.writeText(completion)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Copy to clipboard
+            </button>
+            <button
+              onClick={saveToApplication}
+              disabled={saving}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+            >
+              {saving ? "Saving…" : savedAppId ? "Update in application" : "Save to application"}
+            </button>
+            {saveMsg === "saved" && (
+              <span className="text-xs text-green-600 dark:text-green-400">Saved</span>
+            )}
+            {saveMsg === "error" && (
+              <span className="text-xs text-red-500">Failed to save</span>
+            )}
+          </div>
         </div>
       ) : !isLoading ? (
         <p className="text-sm text-muted-foreground">

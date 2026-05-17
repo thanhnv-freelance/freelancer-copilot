@@ -66,6 +66,20 @@ export const assets = schema.table("assets", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
 
+// ─── Leads ────────────────────────────────────────────────────────────────────
+
+export const leads = schema.table("leads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  company: text("company"),
+  source: text("source").notNull().default("linkedin_dm"), // "linkedin_dm" | "referral" | "direct" | "other"
+  notes: text("notes"),
+  status: text("status").notNull().default("new"), // "new" | "contacted" | "meeting" | "won" | "lost"
+  value: numeric("value"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
 export const profiles = schema.table("profiles", {
@@ -108,3 +122,5 @@ export type NewScoringResult = typeof scoringResults.$inferInsert
 export type Asset = typeof assets.$inferSelect
 export type NewAsset = typeof assets.$inferInsert
 export type Profile = typeof profiles.$inferSelect
+export type Lead = typeof leads.$inferSelect
+export type NewLead = typeof leads.$inferInsert

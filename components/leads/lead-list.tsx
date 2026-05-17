@@ -1,28 +1,32 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
+import type { Lead } from "@/lib/db/schema"
 import { formatDate } from "@/lib/utils/format"
-import type { ApplicationWithJob } from "@/services/application.service"
+
+const SOURCE_LABELS: Record<string, string> = {
+  linkedin_dm: "LinkedIn DM",
+  referral: "Referral",
+  direct: "Direct",
+  other: "Other",
+}
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: "bg-subtle text-muted-foreground",
-  submitted:
-    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  interviewing:
-    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  new: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  contacted: "bg-subtle text-muted-foreground",
+  meeting: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   won: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   lost: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
 }
 
 const NEXT_STATUS: Record<string, { label: string; value: string }[]> = {
-  draft: [{ label: "Mark Submitted", value: "submitted" }],
-  submitted: [
-    { label: "Interviewing", value: "interviewing" },
+  new: [{ label: "Contacted", value: "contacted" }],
+  contacted: [
+    { label: "Meeting", value: "meeting" },
     { label: "Lost", value: "lost" },
   ],
-  interviewing: [
+  meeting: [
     { label: "Won", value: "won" },
     { label: "Lost", value: "lost" },
   ],
@@ -30,17 +34,13 @@ const NEXT_STATUS: Record<string, { label: string; value: string }[]> = {
   lost: [],
 }
 
-export function ApplicationList({
-  applications,
-}: {
-  applications: ApplicationWithJob[]
-}) {
+export function LeadList({ leads }: { leads: Lead[] }) {
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
   async function updateStatus(id: string, status: string) {
     setLoadingId(id)
-    await fetch(`/api/applications/${id}`, {
+    await fetch(`/api/leads/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -49,93 +49,77 @@ export function ApplicationList({
     router.refresh()
   }
 
-  async function deleteApp(id: string) {
+  async function deleteLead(id: string) {
     setLoadingId(id)
-    await fetch(`/api/applications/${id}`, { method: "DELETE" })
+    await fetch(`/api/leads/${id}`, { method: "DELETE" })
     setLoadingId(null)
     router.refresh()
   }
 
-  if (applications.length === 0) {
+  if (leads.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-muted-foreground">
-        No applications found.{" "}
-        <Link href="/jobs" className="underline hover:text-foreground">
-          Browse jobs
-        </Link>{" "}
-        to start tracking.
+        No leads yet. Add your first inbound lead above.
       </div>
     )
   }
 
   return (
     <div className="space-y-2">
-      {applications.map((app) => {
-        const isLoading = loadingId === app.id
-        const nextStatuses = NEXT_STATUS[app.status] ?? []
+      {leads.map((lead) => {
+        const isLoading = loadingId === lead.id
+        const nextStatuses = NEXT_STATUS[lead.status] ?? []
 
         return (
           <div
-            key={app.id}
+            key={lead.id}
             className="rounded-xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center gap-3"
           >
             <div className="flex-1 min-w-0">
-              <Link
-                href={`/jobs/${app.jobId}`}
-                className="text-sm font-medium text-foreground hover:underline block truncate"
-              >
-                {app.jobTitle}
-              </Link>
+              <p className="text-sm font-medium text-foreground">{lead.name}</p>
               <div className="flex flex-wrap items-center gap-2 mt-1.5">
                 <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[app.status] ?? ""}`}
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[lead.status] ?? ""}`}
                 >
-                  {app.status}
+                  {lead.status}
                 </span>
-                {app.projectValue && (
+                <span className="text-xs text-muted-foreground">
+                  {SOURCE_LABELS[lead.source] ?? lead.source}
+                </span>
+                {lead.company && (
                   <span className="text-xs text-muted-foreground">
-                    ${Number(app.projectValue).toLocaleString()}
+                    {lead.company}
                   </span>
                 )}
-                {app.hourlyRate && (
+                {lead.value && (
                   <span className="text-xs text-muted-foreground">
-                    ${Number(app.hourlyRate).toLocaleString()}/hr
+                    ${Number(lead.value).toLocaleString()}
                   </span>
                 )}
-                {app.submittedAt && (
-                  <span className="text-xs text-muted-foreground">
-                    Sent {formatDate(app.submittedAt)}
-                  </span>
-                )}
-                {app.proposalText && (
-                  <span className="text-xs text-faint tabular-nums">
-                    {app.proposalText.trim().split(/\s+/).length}w
-                    {" · "}
-                    {app.proposalText.length}c
-                  </span>
-                )}
+                <span className="text-xs text-faint">
+                  {formatDate(lead.createdAt)}
+                </span>
               </div>
+              {lead.notes && (
+                <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">
+                  {lead.notes}
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2 flex-wrap shrink-0">
               {nextStatuses.map(({ label, value }) => (
                 <button
                   key={value}
-                  onClick={() => updateStatus(app.id, value)}
+                  onClick={() => updateStatus(lead.id, value)}
                   disabled={isLoading}
                   className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                 >
                   {label}
                 </button>
               ))}
-              <Link
-                href={`/applications/${app.id}`}
-                className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Edit
-              </Link>
               <button
-                onClick={() => deleteApp(app.id)}
+                onClick={() => deleteLead(lead.id)}
                 disabled={isLoading}
                 className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-red-500 transition-colors disabled:opacity-50"
               >

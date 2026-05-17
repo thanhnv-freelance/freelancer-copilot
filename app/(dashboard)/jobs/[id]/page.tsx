@@ -105,7 +105,7 @@ export default async function JobDetailPage({
       {/* AI panels */}
       <div className="space-y-4 mb-4">
         <AnalysisPanel jobId={job.id} />
-        <ProposalPanel jobId={job.id} />
+        <ProposalPanel jobId={job.id} appId={existingApplication?.id} />
         <ApplicationPanel jobId={job.id} initial={existingApplication} />
       </div>
 

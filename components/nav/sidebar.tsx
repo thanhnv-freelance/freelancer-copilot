@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/applications", label: "Applications" },
   { href: "/analytics", label: "Analytics" },
   { href: "/assets", label: "Assets" },
+  { href: "/leads", label: "Leads" },
   { href: "/settings", label: "Settings" },
 ]
 

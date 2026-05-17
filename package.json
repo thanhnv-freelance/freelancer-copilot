@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev --turbo",
     "dev:clean": "rm -rf .next && next dev --turbo",
-    "test": "vitest run",
-    "test:ui": "vitest --ui",
+    "test": "vitest run --exclude tests/e2e/**",
+    "test:ui": "vitest --ui --exclude tests/e2e/**",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
