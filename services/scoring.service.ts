@@ -3,6 +3,7 @@ import { scoringResults } from "@/lib/db/schema"
 import { scoreJob } from "@/lib/scoring/engine"
 import { eq, desc, inArray } from "drizzle-orm"
 import type { Job, ScoringResult } from "@/lib/db/schema"
+import { getProfile, toFreelancerProfile } from "@/services/profile.service"
 
 export async function getScoreForJob(jobId: string): Promise<ScoringResult | null> {
   const rows = await db
@@ -31,7 +32,9 @@ export async function getLatestScoresForJobs(
 }
 
 export async function computeAndSaveScore(job: Job): Promise<ScoringResult> {
-  const { score, reasoning, riskFlags } = scoreJob(job)
+  const profileData = await getProfile()
+  const profile = toFreelancerProfile(profileData)
+  const { score, reasoning, riskFlags } = scoreJob(job, profile)
   const [result] = await db
     .insert(scoringResults)
     .values({ jobId: job.id, score, reasoning, riskFlags })

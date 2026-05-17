@@ -7,6 +7,7 @@ import { AnalysisPanel } from "@/components/jobs/analysis-panel"
 import { ProposalPanel } from "@/components/jobs/proposal-panel"
 import { ApplicationPanel } from "@/components/jobs/application-panel"
 import { formatBudget, formatDate } from "@/lib/utils/format"
+import { getPlatformLabel } from "@/lib/constants/platforms"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 
@@ -67,7 +68,7 @@ export default async function JobDetailPage({
             rel="noopener noreferrer"
             className="hover:text-foreground underline"
           >
-            View on Upwork
+            View on {getPlatformLabel(job.source)}
           </a>
         )}
       </div>

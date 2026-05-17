@@ -66,6 +66,18 @@ export const assets = schema.table("assets", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
 
+// ─── Profile ──────────────────────────────────────────────────────────────────
+
+export const profiles = schema.table("profiles", {
+  id: text("id").primaryKey().default("default"),
+  name: text("name").notNull().default(""),
+  bio: text("bio").notNull().default(""),
+  skills: jsonb("skills").$type<string[]>().notNull().default([]),
+  minFixedBudget: numeric("min_fixed_budget").notNull().default("500"),
+  minHourlyRate: numeric("min_hourly_rate").notNull().default("30"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
 // ─── Scoring Results ───────────────────────────────────────────────────────────
 
 export const scoringResults = schema.table("scoring_results", {
@@ -95,3 +107,4 @@ export type ScoringResult = typeof scoringResults.$inferSelect
 export type NewScoringResult = typeof scoringResults.$inferInsert
 export type Asset = typeof assets.$inferSelect
 export type NewAsset = typeof assets.$inferInsert
+export type Profile = typeof profiles.$inferSelect

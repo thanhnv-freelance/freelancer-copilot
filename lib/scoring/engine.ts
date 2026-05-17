@@ -1,5 +1,6 @@
 import type { Job } from "@/lib/db/schema"
 import { FREELANCER_PROFILE } from "./config"
+import type { FreelancerProfile } from "./config"
 
 export interface ReasoningItem {
   factor: string
@@ -32,7 +33,8 @@ const VAGUE_SIGNALS = [
   "straightforward task",
 ]
 
-export function scoreJob(job: Job): ScoreResult {
+export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
+  const p = profile ?? FREELANCER_PROFILE
   const reasoning: ReasoningItem[] = []
   const riskFlags: string[] = []
   let score = BASE_SCORE
@@ -41,7 +43,7 @@ export function scoreJob(job: Job): ScoreResult {
   const jobSkills = ((job.skills as string[]) ?? []).map((s) => s.toLowerCase())
 
   // 1. Skill match — check job skills array and description text
-  for (const { name, weight } of FREELANCER_PROFILE.skills) {
+  for (const { name, weight } of p.skills) {
     const matched =
       jobSkills.some((s) => s.includes(name)) || text.includes(name)
     if (matched) {
@@ -60,13 +62,13 @@ export function scoreJob(job: Job): ScoreResult {
     const max = job.budgetMax ? Number(job.budgetMax) : null
     const effective = min ?? max
     if (effective !== null) {
-      if (effective < FREELANCER_PROFILE.minFixedBudget) {
+      if (effective < p.minFixedBudget) {
         const delta = -20
         score += delta
         reasoning.push({
           factor: "Budget",
           delta,
-          note: `Fixed budget $${effective} below minimum $${FREELANCER_PROFILE.minFixedBudget}`,
+          note: `Fixed budget $${effective} below minimum $${p.minFixedBudget}`,
         })
       } else {
         const delta = 10
@@ -81,13 +83,13 @@ export function scoreJob(job: Job): ScoreResult {
   } else if (job.budgetType === "hourly") {
     const min = job.budgetMin ? Number(job.budgetMin) : null
     if (min !== null) {
-      if (min < FREELANCER_PROFILE.minHourlyRate) {
+      if (min < p.minHourlyRate) {
         const delta = -15
         score += delta
         reasoning.push({
           factor: "Budget",
           delta,
-          note: `Hourly rate $${min}/hr below minimum $${FREELANCER_PROFILE.minHourlyRate}/hr`,
+          note: `Hourly rate $${min}/hr below minimum $${p.minHourlyRate}/hr`,
         })
       } else {
         const delta = 10

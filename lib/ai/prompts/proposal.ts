@@ -1,13 +1,12 @@
 import type { Job } from "@/lib/db/schema"
 
-// Edit this profile to match your actual background
-const FREELANCER_BIO = `
+const DEFAULT_BIO = `
 - Expertise: Java, Spring Boot, AWS, Payment Systems, PostgreSQL, Kotlin, Microservices, Docker
 - Experience: 5+ years backend development specializing in payment integrations and enterprise Java apps
 - Approach: clean architecture, API-first design, thorough documentation
 `.trim()
 
-export function buildProposalPrompt(job: Job): string {
+export function buildProposalPrompt(job: Job, bio?: string): string {
   const skills = (job.skills as string[]).join(", ")
   const budget =
     job.budgetType === "fixed"
@@ -17,7 +16,7 @@ export function buildProposalPrompt(job: Job): string {
   return `You are writing a freelance proposal on behalf of a developer. Generate a compelling, personalized Upwork proposal.
 
 FREELANCER PROFILE:
-${FREELANCER_BIO}
+${bio && bio.trim() ? bio.trim() : DEFAULT_BIO}
 
 JOB DETAILS:
 Title: ${job.title}
