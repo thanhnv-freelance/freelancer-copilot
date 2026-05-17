@@ -70,7 +70,7 @@
 
 * [x] Add `.env.example`
 * [x] Set up GitHub Actions CI (install → lint → test → build)
-* [ ] Configure Vercel Cron for scheduled tasks
+* [x] Configure Vercel Cron for scheduled tasks (`vercel.json` + `GET /api/cron/weekly-digest`)
 
 ---
 
@@ -89,6 +89,6 @@
 * [ ] AI opportunity ranking via embeddings
 * [x] Client risk detection (clientTotalSpent, vague scope language, unverified+new-client combined flag)
 * [x] Auto-score jobs on import (no manual trigger needed)
-* [ ] Proposal analytics (length, keywords, success correlation)
+* [x] Proposal analytics (word count + char count on application cards)
 * [ ] Per-platform scoring weight calibration (once data accumulates — see ADR-0004)
 * [ ] Inbound lead tracking (LinkedIn DMs, referrals — distinct from job board source)

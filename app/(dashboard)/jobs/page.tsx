@@ -1,4 +1,5 @@
 import { getJobs } from "@/services/job.service"
+import { getLatestScoresForJobs } from "@/services/scoring.service"
 import { JobCard } from "@/components/jobs/job-card"
 import { PLATFORMS } from "@/lib/constants/platforms"
 import Link from "next/link"
@@ -37,6 +38,7 @@ export default async function JobsPage({
     budgetType: activeBudget,
     source: activeSource,
   })
+  const scores = await getLatestScoresForJobs(jobs.map((j) => j.id))
 
   function buildUrl(overrides: Record<string, string>) {
     const next = { status: activeStatus, budgetType: activeBudget, source: activeSource, ...overrides }
@@ -127,7 +129,7 @@ export default async function JobsPage({
       ) : (
         <div className="space-y-3">
           {jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
+            <JobCard key={job.id} job={job} score={scores.get(job.id)} />
           ))}
         </div>
       )}

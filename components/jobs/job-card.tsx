@@ -11,7 +11,13 @@ const STATUS_STYLES: Record<string, string> = {
   skipped: "bg-subtle text-faint",
 }
 
-export function JobCard({ job }: { job: Job }) {
+function scoreStyle(score: number) {
+  if (score >= 75) return "text-green-600 dark:text-green-400"
+  if (score >= 50) return "text-amber-600 dark:text-amber-400"
+  return "text-red-500 dark:text-red-400"
+}
+
+export function JobCard({ job, score }: { job: Job; score?: number }) {
   const skills = (job.skills as string[]) ?? []
 
   return (
@@ -45,6 +51,11 @@ export function JobCard({ job }: { job: Job }) {
         </div>
 
         <div className="shrink-0 text-right space-y-1.5">
+          {score !== undefined && (
+            <p className={`text-sm font-semibold tabular-nums ${scoreStyle(score)}`}>
+              {score}
+            </p>
+          )}
           <div className="flex items-center justify-end gap-1.5">
             <span className="px-2 py-0.5 rounded-full bg-subtle text-xs text-faint">
               {getPlatformLabel(job.source)}

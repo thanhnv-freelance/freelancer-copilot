@@ -107,6 +107,13 @@ export function ApplicationList({
                     Sent {formatDate(app.submittedAt)}
                   </span>
                 )}
+                {app.proposalText && (
+                  <span className="text-xs text-faint tabular-nums">
+                    {app.proposalText.trim().split(/\s+/).length}w
+                    {" · "}
+                    {app.proposalText.length}c
+                  </span>
+                )}
               </div>
             </div>
 
