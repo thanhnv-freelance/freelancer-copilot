@@ -1,6 +1,7 @@
 "use server"
 
 import { createJob } from "@/services/job.service"
+import { computeAndSaveScore } from "@/services/scoring.service"
 import { redirect } from "next/navigation"
 
 export async function importJobAction(formData: FormData) {
@@ -33,6 +34,8 @@ export async function importJobAction(formData: FormData) {
     url: (formData.get("url") as string) || null,
     status: "new",
   })
+
+  await computeAndSaveScore(job)
 
   redirect(`/jobs/${job.id}`)
 }

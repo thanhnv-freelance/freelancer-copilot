@@ -10,12 +10,31 @@ export interface ReasoningItem {
 export interface ScoreResult {
   score: number
   reasoning: ReasoningItem[]
+  riskFlags: string[]
 }
 
 const BASE_SCORE = 40
 
+const VAGUE_SIGNALS = [
+  "should be easy",
+  "should be simple",
+  "very simple",
+  "easy task",
+  "quick task",
+  "simple task",
+  "fast task",
+  "nothing complicated",
+  "won't take long",
+  "simple fix",
+  "quick fix",
+  "easy fix",
+  "nothing fancy",
+  "straightforward task",
+]
+
 export function scoreJob(job: Job): ScoreResult {
   const reasoning: ReasoningItem[] = []
+  const riskFlags: string[] = []
   let score = BASE_SCORE
 
   const text = `${job.title} ${job.description}`.toLowerCase()
@@ -166,5 +185,75 @@ export function scoreJob(job: Job): ScoreResult {
     }
   }
 
-  return { score: Math.max(0, Math.min(100, score)), reasoning }
+  // 7. Client total spent
+  if (job.clientTotalSpent !== null && job.clientTotalSpent !== undefined) {
+    const spent = Number(job.clientTotalSpent)
+    if (spent >= 10000) {
+      const delta = 10
+      score += delta
+      reasoning.push({
+        factor: "Client Spend",
+        delta,
+        note: `$${spent.toLocaleString()} total spent — proven client`,
+      })
+    } else if (spent >= 1000) {
+      const delta = 5
+      score += delta
+      reasoning.push({
+        factor: "Client Spend",
+        delta,
+        note: `$${spent.toLocaleString()} total spent — some history`,
+      })
+    } else {
+      const delta = -10
+      score += delta
+      reasoning.push({
+        factor: "Client Spend",
+        delta,
+        note: `$${spent.toLocaleString()} total spent — low spending history`,
+      })
+      riskFlags.push("Low client spending history")
+    }
+  }
+
+  // 8. Scope clarity
+  const hasVagueSignals = VAGUE_SIGNALS.some((phrase) => text.includes(phrase))
+  if (hasVagueSignals) {
+    const delta = -15
+    score += delta
+    reasoning.push({
+      factor: "Scope Clarity",
+      delta,
+      note: "Description contains vague scope signals",
+    })
+    riskFlags.push("Vague or unclear scope language")
+  }
+  if (job.description.length < 150) {
+    const delta = -10
+    score += delta
+    reasoning.push({
+      factor: "Scope Clarity",
+      delta,
+      note: `Very short description (${job.description.length} chars) — requirements likely underspecified`,
+    })
+    riskFlags.push("Very short description")
+  }
+
+  // 9. Combined risk: unverified payment + no spending history
+  const noSpend =
+    job.clientTotalSpent === null ||
+    job.clientTotalSpent === undefined ||
+    Number(job.clientTotalSpent) < 100
+  if (!job.paymentVerified && noSpend) {
+    const delta = -10
+    score += delta
+    reasoning.push({
+      factor: "Client Risk",
+      delta,
+      note: "Unverified payment method with no spending history",
+    })
+    riskFlags.push("High risk: unverified payment and no spending history")
+  }
+
+  return { score: Math.max(0, Math.min(100, score)), reasoning, riskFlags }
 }

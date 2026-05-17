@@ -87,7 +87,8 @@
 
 * [x] Reusable assets library (proposal templates, intro messages, architecture writeups, checklists)
 * [ ] AI opportunity ranking via embeddings
-* [ ] Client risk detection (hire rate, unclear scope signals)
+* [x] Client risk detection (clientTotalSpent, vague scope language, unverified+new-client combined flag)
+* [x] Auto-score jobs on import (no manual trigger needed)
 * [ ] Proposal analytics (length, keywords, success correlation)
 * [ ] Per-platform scoring weight calibration (once data accumulates — see ADR-0004)
 * [ ] Inbound lead tracking (LinkedIn DMs, referrals — distinct from job board source)

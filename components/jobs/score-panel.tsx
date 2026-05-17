@@ -29,6 +29,7 @@ export function ScorePanel({
   }
 
   const reasoning = (result?.reasoning as ReasoningItem[]) ?? []
+  const riskFlags = (result?.riskFlags as string[]) ?? []
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">
@@ -46,6 +47,22 @@ export function ScorePanel({
       {result ? (
         <>
           <ScoreBadge score={result.score} />
+
+          {riskFlags.length > 0 && (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/20 px-4 py-3">
+              <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1.5">
+                Risk Flags
+              </p>
+              <ul className="space-y-1">
+                {riskFlags.map((flag, i) => (
+                  <li key={i} className="text-xs text-red-600 dark:text-red-400 flex items-start gap-1.5">
+                    <span className="mt-0.5 shrink-0">⚑</span>
+                    {flag}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {reasoning.length > 0 && (
             <ul className="mt-4 space-y-2">

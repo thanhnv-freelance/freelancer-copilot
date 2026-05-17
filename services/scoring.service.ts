@@ -15,10 +15,10 @@ export async function getScoreForJob(jobId: string): Promise<ScoringResult | nul
 }
 
 export async function computeAndSaveScore(job: Job): Promise<ScoringResult> {
-  const { score, reasoning } = scoreJob(job)
+  const { score, reasoning, riskFlags } = scoreJob(job)
   const [result] = await db
     .insert(scoringResults)
-    .values({ jobId: job.id, score, reasoning })
+    .values({ jobId: job.id, score, reasoning, riskFlags })
     .returning()
   return result
 }

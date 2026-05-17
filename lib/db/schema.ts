@@ -78,6 +78,10 @@ export const scoringResults = schema.table("scoring_results", {
     .$type<{ factor: string; delta: number; note: string }[]>()
     .notNull()
     .default([]),
+  riskFlags: jsonb("risk_flags")
+    .$type<string[]>()
+    .notNull()
+    .default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 })
 

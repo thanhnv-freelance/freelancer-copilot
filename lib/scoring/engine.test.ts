@@ -87,4 +87,62 @@ describe("scoreJob", () => {
     )
     expect(score).toBeLessThanOrEqual(100)
   })
+
+  it("rewards proven client with high total spent", () => {
+    const high = scoreJob(makeJob({ clientTotalSpent: "15000" })).score
+    const low = scoreJob(makeJob({ clientTotalSpent: "50" })).score
+    expect(high).toBeGreaterThan(low)
+  })
+
+  it("adds risk flag for low client spending history", () => {
+    const { riskFlags } = scoreJob(makeJob({ clientTotalSpent: "50", paymentVerified: true }))
+    expect(riskFlags).toContain("Low client spending history")
+  })
+
+  it("penalizes vague scope language", () => {
+    const vague = scoreJob(
+      makeJob({ description: "This should be easy, just a quick fix for our site" })
+    ).score
+    const clear = scoreJob(
+      makeJob({ description: "Build a Spring Boot microservice with JWT auth and PostgreSQL integration" })
+    ).score
+    expect(clear).toBeGreaterThan(vague)
+  })
+
+  it("adds risk flag for vague scope language", () => {
+    const { riskFlags } = scoreJob(
+      makeJob({ description: "This should be easy, just a quick fix" })
+    )
+    expect(riskFlags).toContain("Vague or unclear scope language")
+  })
+
+  it("adds risk flag for very short description", () => {
+    const { riskFlags } = scoreJob(makeJob({ description: "Build a website" }))
+    expect(riskFlags).toContain("Very short description")
+  })
+
+  it("adds high-risk flag for unverified payment with no spending history", () => {
+    const { riskFlags } = scoreJob(
+      makeJob({ paymentVerified: false, clientTotalSpent: null })
+    )
+    expect(riskFlags).toContain("High risk: unverified payment and no spending history")
+  })
+
+  it("does not flag combined risk when payment is verified", () => {
+    const { riskFlags } = scoreJob(
+      makeJob({ paymentVerified: true, clientTotalSpent: null })
+    )
+    expect(riskFlags).not.toContain("High risk: unverified payment and no spending history")
+  })
+
+  it("returns empty riskFlags for a clean job", () => {
+    const { riskFlags } = scoreJob(
+      makeJob({
+        paymentVerified: true,
+        clientTotalSpent: "20000",
+        description: "Build a Spring Boot payment microservice with AWS deployment and PostgreSQL database. We need experience with Stripe integration and event-driven architecture.",
+      })
+    )
+    expect(riskFlags).toHaveLength(0)
+  })
 })
