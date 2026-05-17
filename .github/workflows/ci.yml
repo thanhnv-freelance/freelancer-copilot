@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint → Test → Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+        env:
+          # Dummy values — no real connections are made during next build.
+          # Dashboard routes are all dynamic (server-rendered on demand),
+          # so DB/AI clients are never initialised at build time.
+          DATABASE_URL: postgresql://ci:ci@localhost/ci
+          ANTHROPIC_API_KEY: sk-ant-ci-placeholder
+          OPENAI_API_KEY: sk-ci-placeholder
+          NEXTAUTH_SECRET: ci-nextauth-secret-placeholder
+          NEXTAUTH_URL: http://localhost:3000

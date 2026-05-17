@@ -54,6 +54,18 @@ export const applications = schema.table("applications", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
 
+// ─── Assets ───────────────────────────────────────────────────────────────────
+
+export const assets = schema.table("assets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  category: text("category").notNull().default("proposal"), // "proposal" | "intro" | "architecture" | "checklist"
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
 // ─── Scoring Results ───────────────────────────────────────────────────────────
 
 export const scoringResults = schema.table("scoring_results", {
@@ -77,3 +89,5 @@ export type Application = typeof applications.$inferSelect
 export type NewApplication = typeof applications.$inferInsert
 export type ScoringResult = typeof scoringResults.$inferSelect
 export type NewScoringResult = typeof scoringResults.$inferInsert
+export type Asset = typeof assets.$inferSelect
+export type NewAsset = typeof assets.$inferInsert

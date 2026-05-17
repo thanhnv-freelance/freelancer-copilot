@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/jobs", label: "Jobs" },
   { href: "/applications", label: "Applications" },
   { href: "/analytics", label: "Analytics" },
+  { href: "/assets", label: "Assets" },
   { href: "/settings", label: "Settings" },
 ]
 

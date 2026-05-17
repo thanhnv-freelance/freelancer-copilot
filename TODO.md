@@ -69,7 +69,7 @@
 ## Infrastructure
 
 * [x] Add `.env.example`
-* [ ] Set up GitHub Actions CI (install → lint → test → build)
+* [x] Set up GitHub Actions CI (install → lint → test → build)
 * [ ] Configure Vercel Cron for scheduled tasks
 
 ---
@@ -85,7 +85,7 @@
 
 ## Future
 
-* [ ] Reusable assets library (proposal templates, intro messages)
+* [x] Reusable assets library (proposal templates, intro messages, architecture writeups, checklists)
 * [ ] AI opportunity ranking via embeddings
 * [ ] Client risk detection (hire rate, unclear scope signals)
 * [ ] Proposal analytics (length, keywords, success correlation)
