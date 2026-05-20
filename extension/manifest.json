@@ -16,7 +16,8 @@
     {
       "matches": [
         "https://www.upwork.com/jobs/*",
-        "https://www.upwork.com/ab/applicants/*/apply"
+        "https://www.upwork.com/nx/*",
+        "https://www.upwork.com/ab/applicants/*"
       ],
       "js": ["content/upwork.js"],
       "run_at": "document_idle"

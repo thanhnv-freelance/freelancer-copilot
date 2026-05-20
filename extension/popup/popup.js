@@ -115,8 +115,8 @@ async function extractJob() {
 
   const url = tab.url || ""
 
-  // If we can read the URL and it's clearly not a job page, show idle immediately
-  if (url && !url.includes("upwork.com/jobs/") && !url.includes("upwork.com/ab/applicants/")) {
+  // If we can read the URL and it's clearly not Upwork at all, show idle immediately
+  if (url && !url.includes("upwork.com")) {
     showState("idle")
     return
   }
