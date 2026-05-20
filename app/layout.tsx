@@ -32,7 +32,7 @@ export default function RootLayout({
       <head>
         {/* Prevent flash of unstyled content — runs before hydration */}
         <script dangerouslySetInnerHTML={{
-          __html: `(function(){try{var t=localStorage.getItem('theme');if(t!=='light')document.documentElement.classList.add('dark')}catch(e){document.documentElement.classList.add('dark')}})()`
+          __html: `(function(){try{var t=localStorage.getItem('freelancer-copilot:theme');if(t!=='light')document.documentElement.classList.add('dark')}catch(e){document.documentElement.classList.add('dark')}})()`
         }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">

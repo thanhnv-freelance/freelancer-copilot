@@ -1,14 +1,30 @@
 // Freelancer Copilot — Upwork content script
 // Selectors verified against live Upwork HTML (nx/find-work saved-jobs slider + job tiles).
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
+function waitFor(fn, timeout = 8000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now()
+    const poll = () => {
+      const result = fn()
+      if (result) return resolve(result)
+      if (Date.now() - start > timeout) return reject(new Error("Timeout"))
+      setTimeout(poll, 250)
+    }
+    poll()
+  })
+}
 
 function getText(selector, root = document) {
   return root.querySelector(selector)?.textContent?.trim() ?? null
 }
 
 function parseSpent(text) {
-  // "$21K", "$60K+", "$1.2M", "$500"
   const m = text.match(/\$([\d,.]+)\s*([KkMmBb]?)/)
   if (!m) return null
   let val = parseFloat(m[1].replace(/,/g, ""))
@@ -46,32 +62,22 @@ function parseBudget(text) {
   return { budgetType: isHourly ? "hourly" : "fixed", budgetMin: null, budgetMax: null }
 }
 
-// Extract skill-like lines from the tail of the description text.
-// Upwork appends skills as short keyword lines at the bottom of the description <p>.
 function splitDescriptionAndSkills(fullText) {
   const lines = fullText.split("\n").map((l) => l.trim()).filter(Boolean)
 
-  // A line looks like a skill tag if it:
-  // - is ≤ 5 words
-  // - contains no sentence-ending punctuation (no . , ; : ? !)
-  //   (except dots in tech names like "Next.js", "Node.js")
-  // - does not start with a dash/bullet
   function looksLikeSkill(line) {
     if (line.startsWith("-") || line.startsWith("•") || line.startsWith("*")) return false
     if (/[,;:?!]/.test(line)) return false
-    // Allow dots only in tech patterns like "Next.js", "Node.js", "ASP.NET"
     if (/\.\s/.test(line) || /\.$/.test(line)) return false
     const words = line.split(/\s+/)
     return words.length <= 5 && line.length <= 50
   }
 
-  // Walk from the bottom; collect skill lines until we hit prose
   let splitIdx = lines.length
   for (let i = lines.length - 1; i >= 0; i--) {
     if (looksLikeSkill(lines[i])) {
       splitIdx = i
     } else {
-      // Allow one prose line gap (some descriptions have a blank separator)
       if (i < lines.length - 1 && splitIdx < lines.length) break
       else break
     }
@@ -79,43 +85,33 @@ function splitDescriptionAndSkills(fullText) {
 
   const skills = lines.slice(splitIdx).filter(looksLikeSkill)
   const description = lines.slice(0, splitIdx).join("\n").trim()
-
   return { description: description || fullText, skills }
 }
 
-// ── Main extractor ────────────────────────────────────────────────────────────
+// ── Job extractor (slider) ────────────────────────────────────────────────────
 
 function extractJob() {
-  // ── Canonical URL ──────────────────────────────────────────────────────────
-  // Prefer the "Open in new window" link inside the slider — it's the clean job URL
   const openLink = document.querySelector('[data-test="slider-open-in-new-window"]')
-  const url =
-    openLink?.getAttribute("href")?.split("?")[0] || window.location.href
+  const url = openLink?.getAttribute("href")?.split("?")[0] || window.location.href
 
-  // ── Title ──────────────────────────────────────────────────────────────────
-  // Slider: <h4><span class="flex-1">Title</span></h4>
   const sliderH4 = document.querySelector('[data-test="air3-slider"] h4')
   const title =
     sliderH4?.querySelector(".flex-1")?.textContent?.trim() ||
     sliderH4?.textContent?.trim() ||
     document.querySelector('[data-cy="job-title"]')?.textContent?.trim() ||
-    document.querySelector('h1')?.textContent?.trim() ||
+    document.querySelector("h1")?.textContent?.trim() ||
     document.title.replace(/\s*[|\-–]\s*Upwork.*$/i, "").trim()
 
-  // ── Description + skills ───────────────────────────────────────────────────
-  // The Description section holds both the prose body AND skill keywords (tail lines)
-  const descEl = document.querySelector('[data-test="Description"] p')
-    ?? document.querySelector('[data-test="Description"]')
-    ?? document.querySelector('[data-test="job-description-text"]')
+  const descEl =
+    document.querySelector('[data-test="Description"] p') ??
+    document.querySelector('[data-test="Description"]') ??
+    document.querySelector('[data-test="job-description-text"]')
 
   const rawDescText = descEl?.innerText?.trim() ?? ""
   const { description, skills: extractedSkills } = splitDescriptionAndSkills(rawDescText)
 
-  // ── Budget & job type ──────────────────────────────────────────────────────
   const jobTypeEl = document.querySelector('[data-test="job-type"]')
-  const budgetEl  = document.querySelector('[data-test="budget"]')
-
-  // Detect hourly via icon: data-cy="clock-hourly" only present for hourly jobs
+  const budgetEl = document.querySelector('[data-test="budget"]')
   const isHourly =
     !!document.querySelector('[data-cy="clock-hourly"]') ||
     jobTypeEl?.textContent?.toLowerCase().includes("hourly") ||
@@ -128,12 +124,10 @@ function extractJob() {
   if (budgetEl) {
     const b = parseBudget((isHourly ? "hourly " : "") + budgetEl.textContent)
     budgetType = b.budgetType
-    budgetMin  = b.budgetMin
-    budgetMax  = b.budgetMax
+    budgetMin = b.budgetMin
+    budgetMax = b.budgetMax
   }
 
-  // ── Proposals ─────────────────────────────────────────────────────────────
-  // proposals-section is often collapsed; try to read the toggle label or tile data
   let proposalCount = null
   const propSection = document.querySelector('[data-test="proposals-section"]')
   if (propSection) {
@@ -146,48 +140,42 @@ function extractJob() {
     }
   }
 
-  // ── Client info ────────────────────────────────────────────────────────────
   const clientContainer = document.querySelector('[data-test="about-client-container"]')
-
   let paymentVerified = false
-  let clientRating    = null
-  let clientHireRate  = null
+  let clientRating = null
+  let clientHireRate = null
   let clientTotalSpent = null
-  let clientLocation  = null
+  let clientLocation = null
 
   if (clientContainer) {
-    // Payment verified: presence of .payment-verified div (green checkmark)
-    paymentVerified = !!clientContainer.querySelector('.payment-verified')
+    paymentVerified = !!clientContainer.querySelector(".payment-verified")
 
-    // Rating: [data-testid="buyer-rating"] .air3-rating-value-text  → "5.0"
-    const ratingEl = clientContainer.querySelector('[data-testid="buyer-rating"] .air3-rating-value-text')
-      ?? clientContainer.querySelector('[data-testid="buyer-rating"]')
+    const ratingEl =
+      clientContainer.querySelector('[data-testid="buyer-rating"] .air3-rating-value-text') ??
+      clientContainer.querySelector('[data-testid="buyer-rating"]')
     if (ratingEl) {
       const rm = ratingEl.textContent?.match(/([\d.]+)/)
       if (rm) clientRating = rm[1]
     }
 
-    // Hire rate: [data-qa="client-job-posting-stats"] → "75% hire rate, 5 open jobs"
     const statsEl = clientContainer.querySelector('[data-qa="client-job-posting-stats"]')
     if (statsEl) {
       const sm = statsEl.textContent?.match(/(\d+)%\s*hire\s*rate/i)
       if (sm) clientHireRate = sm[1]
     }
 
-    // Total spent: [data-qa="client-spend"] → "$21K total spent"
-    const spentEl = clientContainer.querySelector('[data-qa="client-spend"]')
-      ?? clientContainer.querySelector('[data-test="client-spendings"]')
-      ?? clientContainer.querySelector('[data-test="formatted-amount"]')
-    if (spentEl) {
-      clientTotalSpent = parseSpent(spentEl.textContent || "")
-    }
+    const spentEl =
+      clientContainer.querySelector('[data-qa="client-spend"]') ??
+      clientContainer.querySelector('[data-test="client-spendings"]') ??
+      clientContainer.querySelector('[data-test="formatted-amount"]')
+    if (spentEl) clientTotalSpent = parseSpent(spentEl.textContent || "")
 
-    // Location: [data-qa="client-location"] → "Liepaja"
     const locEl = clientContainer.querySelector('[data-qa="client-location"]')
     if (locEl) {
-      clientLocation = locEl.querySelector("span.nowrap")?.textContent?.trim()
-        ?? locEl.textContent?.replace(/\d{1,2}:\d{2}\s*(AM|PM)?/i, "").trim()
-        ?? null
+      clientLocation =
+        locEl.querySelector("span.nowrap")?.textContent?.trim() ??
+        locEl.textContent?.replace(/\d{1,2}:\d{2}\s*(AM|PM)?/i, "").trim() ??
+        null
     }
   }
 
@@ -199,7 +187,7 @@ function extractJob() {
     budgetMin,
     budgetMax,
     proposalCount,
-    clientName: clientLocation,   // best available — no explicit client name field
+    clientName: clientLocation,
     clientRating,
     clientHireRate,
     clientTotalSpent,
@@ -209,7 +197,179 @@ function extractJob() {
   }
 }
 
+// ── Page detection ────────────────────────────────────────────────────────────
+
+function detectPage() {
+  // Both the regular feed AND the saved-jobs list use the same tile structure.
+  // The saved-jobs details page (/saved-jobs/details/~02...) has a slider open
+  // with those same tiles in the background — hasSlider takes priority there.
+  const tiles = Array.from(
+    document.querySelectorAll('[data-test="job-tile-list"] section[data-ev-opening_uid]')
+  )
+  const sliderTitle = document.querySelector('[data-test="air3-slider"] h4 .flex-1')
+  const hasSlider = !!sliderTitle?.textContent?.trim()
+
+  return {
+    hasSlider,
+    job: hasSlider ? extractJob() : null,
+    tileCount: tiles.length,
+    upworkIds: tiles.map((t) => t.getAttribute("data-ev-opening_uid")).filter(Boolean),
+  }
+}
+
+// ── Bulk import ───────────────────────────────────────────────────────────────
+
+let _stopBulk = false
+
+async function bulkImport(appUrl, apiKey) {
+  _stopBulk = false
+  const processed = new Set()
+  let imported = 0
+  let skipped = 0
+  let failed = 0
+
+  function sendProgress(status, title = "") {
+    try {
+      chrome.runtime.sendMessage({
+        type: "BULK_PROGRESS",
+        imported,
+        skipped,
+        failed,
+        processed: processed.size,
+        status,
+        title,
+      })
+    } catch {}
+  }
+
+  while (!_stopBulk) {
+    // Collect unprocessed tiles
+    const tiles = Array.from(
+      document.querySelectorAll('[data-test="job-tile-list"] section[data-ev-opening_uid]')
+    ).filter((t) => {
+      const uid = t.getAttribute("data-ev-opening_uid")
+      return uid && !processed.has(uid)
+    })
+
+    if (tiles.length === 0) {
+      // Try "Load more"
+      const loadMore = document.querySelector('[data-test="load-more-button"]')
+      if (!loadMore || _stopBulk) break
+
+      const countBefore = document.querySelectorAll(
+        '[data-test="job-tile-list"] section[data-ev-opening_uid]'
+      ).length
+      loadMore.click()
+
+      try {
+        await waitFor(
+          () =>
+            document.querySelectorAll(
+              '[data-test="job-tile-list"] section[data-ev-opening_uid]'
+            ).length > countBefore,
+          8000
+        )
+      } catch {
+        break // no more pages
+      }
+      continue
+    }
+
+    // Batch duplicate check
+    const batchIds = tiles
+      .map((t) => t.getAttribute("data-ev-opening_uid"))
+      .filter(Boolean)
+
+    let existingIds = new Set()
+    try {
+      const res = await fetch(`${appUrl}/api/jobs/check-duplicates`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ upworkIds: batchIds }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        existingIds = new Set(data.existing)
+      }
+    } catch {}
+
+    for (const tile of tiles) {
+      if (_stopBulk) break
+
+      const uid = tile.getAttribute("data-ev-opening_uid")
+      processed.add(uid)
+
+      const tileTitle =
+        tile.querySelector(".job-tile-title a")?.textContent?.trim() ||
+        tile.querySelector("h3 a")?.textContent?.trim() ||
+        "Job"
+
+      if (existingIds.has(uid)) {
+        skipped++
+        sendProgress("skipping", tileTitle)
+        continue
+      }
+
+      sendProgress("opening", tileTitle)
+
+      // Click tile to open slider
+      tile.click()
+
+      try {
+        // Wait for slider content to load
+        await waitFor(
+          () => document.querySelector('[data-test="air3-slider"] h4 .flex-1')?.textContent?.trim(),
+          8000
+        )
+        await sleep(600) // let DOM settle
+
+        const job = extractJob()
+
+        const importRes = await fetch(`${appUrl}/api/extension/import`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify(job),
+        })
+
+        if (importRes.ok) {
+          imported++
+        } else {
+          failed++
+        }
+      } catch {
+        failed++
+      }
+
+      // Close slider
+      const backBtn =
+        document.querySelector('[data-test="slider-go-back"]') ||
+        document.querySelector('[data-test="slider-close-mobile"]')
+      backBtn?.click()
+
+      await sleep(600) // wait for slider to close
+      sendProgress("progress", tileTitle)
+    }
+  }
+
+  try {
+    chrome.runtime.sendMessage({
+      type: "BULK_COMPLETE",
+      imported,
+      skipped,
+      failed,
+      total: processed.size,
+    })
+  } catch {}
+}
+
 // ── Message listener ──────────────────────────────────────────────────────────
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "EXTRACT_JOB") {
     try {
@@ -217,6 +377,27 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     } catch (err) {
       sendResponse({ ok: false, error: String(err) })
     }
+    return true
   }
-  return true
+
+  if (message.type === "SCAN_PAGE") {
+    try {
+      sendResponse({ ok: true, page: detectPage() })
+    } catch (err) {
+      sendResponse({ ok: false, error: String(err) })
+    }
+    return true
+  }
+
+  if (message.type === "BULK_IMPORT") {
+    bulkImport(message.appUrl, message.apiKey)
+    sendResponse({ ok: true })
+    return true
+  }
+
+  if (message.type === "STOP_BULK_IMPORT") {
+    _stopBulk = true
+    sendResponse({ ok: true })
+    return true
+  }
 })

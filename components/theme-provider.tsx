@@ -17,7 +17,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark')
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') as Theme | null
+    const stored = localStorage.getItem('freelancer-copilot:theme') as Theme | null
     const resolved: Theme = stored === 'light' ? 'light' : 'dark'
     setThemeState(resolved)
     document.documentElement.classList.toggle('dark', resolved === 'dark')
@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   function setTheme(t: Theme) {
     setThemeState(t)
-    localStorage.setItem('theme', t)
+    localStorage.setItem('freelancer-copilot:theme', t)
     document.documentElement.classList.toggle('dark', t === 'dark')
   }
 

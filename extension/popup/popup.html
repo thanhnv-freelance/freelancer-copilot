@@ -238,6 +238,62 @@
     .save-ok { font-size: 11px; color: #4ade80; margin-left: 8px; opacity: 0; transition: opacity 0.3s; }
     .save-ok.show { opacity: 1; }
 
+    /* ── Bulk import ── */
+    .state-list {
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .list-summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .list-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      display: flex; align-items: center; justify-content: center;
+      color: #666; flex-shrink: 0;
+    }
+    .list-count { font-size: 20px; font-weight: 700; color: #fff; line-height: 1; }
+    .list-label { font-size: 11px; color: #555; margin-top: 2px; }
+
+    .progress-bar-track {
+      height: 3px;
+      background: #1f1f1f;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #fff;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    .progress-stats {
+      display: flex;
+      gap: 14px;
+      font-size: 11px;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-num { font-size: 16px; font-weight: 700; color: #fff; line-height: 1; }
+    .stat-label { color: #555; }
+    .stat-item.green .stat-num { color: #4ade80; }
+    .stat-item.yellow .stat-num { color: #facc15; }
+    .stat-item.red .stat-num { color: #f87171; }
+
+    .progress-current {
+      font-size: 11px;
+      color: #444;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     /* hide utility */
     .hidden { display: none !important; }
   </style>
@@ -298,6 +354,63 @@
   <div class="footer hidden" id="footer">
     <button class="btn-primary" id="btn-import">Import Job</button>
     <button class="btn-secondary" id="btn-retry">Re-extract</button>
+  </div>
+
+  <!-- State: job list (saved jobs page) -->
+  <div class="state state-list hidden" id="state-list">
+    <div class="list-summary">
+      <div class="list-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </div>
+      <div>
+        <div class="list-count" id="list-count">0</div>
+        <div class="list-label">saved jobs found on this page</div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btn-bulk-import">Import All New Jobs</button>
+  </div>
+
+  <!-- State: bulk import in progress -->
+  <div class="state state-list hidden" id="state-bulk-progress">
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="bulk-progress-bar"></div>
+    </div>
+    <div class="progress-stats">
+      <div class="stat-item green">
+        <div class="stat-num" id="bulk-imported">0</div>
+        <div class="stat-label">imported</div>
+      </div>
+      <div class="stat-item yellow">
+        <div class="stat-num" id="bulk-skipped">0</div>
+        <div class="stat-label">duplicate</div>
+      </div>
+      <div class="stat-item red">
+        <div class="stat-num" id="bulk-failed">0</div>
+        <div class="stat-label">failed</div>
+      </div>
+      <div class="stat-item" style="margin-left:auto">
+        <div class="stat-num" id="bulk-processed">0</div>
+        <div class="stat-label">processed</div>
+      </div>
+    </div>
+    <div class="progress-current" id="bulk-current">Starting…</div>
+    <button class="btn-secondary" id="btn-stop-bulk">Stop</button>
+  </div>
+
+  <!-- State: bulk import complete -->
+  <div class="state state-list hidden" id="state-bulk-complete">
+    <div class="list-summary">
+      <div class="success-icon" style="font-size:22px">✓</div>
+      <div>
+        <div class="success-msg" style="font-size:13px">Import complete</div>
+        <div class="success-sub" id="bulk-summary"></div>
+      </div>
+    </div>
+    <a id="bulk-view-link" class="btn-link" href="#" target="_blank">View Jobs in Copilot →</a>
   </div>
 
   <!-- Settings panel -->
