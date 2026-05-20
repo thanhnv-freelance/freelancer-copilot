@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Freelancer Copilot",
+  "version": "1.0.0",
+  "description": "Import jobs from Upwork directly into Freelancer Copilot",
+  "permissions": ["activeTab", "tabs", "storage"],
+  "host_permissions": [
+    "https://www.upwork.com/*",
+    "http://localhost:3005/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Freelancer Copilot"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.upwork.com/jobs/*",
+        "https://www.upwork.com/ab/applicants/*/apply"
+      ],
+      "js": ["content/upwork.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
