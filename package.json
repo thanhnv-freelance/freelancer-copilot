@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
-    "dev:clean": "rm -rf .next && next dev --turbo",
+    "dev": "next dev --turbo -p 3005",
+    "dev:clean": "rm -rf .next && next dev --turbo -p 3005",
     "test": "vitest run --exclude tests/e2e/**",
     "test:ui": "vitest --ui --exclude tests/e2e/**",
     "test:e2e": "playwright test",
