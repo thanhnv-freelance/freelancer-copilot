@@ -69,3 +69,7 @@ export async function updateJobStatus(id: string, status: string) {
     .set({ status, updatedAt: new Date() })
     .where(eq(jobs.id, id))
 }
+
+export async function deleteJob(id: string) {
+  await db.delete(jobs).where(eq(jobs.id, id))
+}

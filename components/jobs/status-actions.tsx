@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 const ACTIONS = [
   {
@@ -31,6 +32,7 @@ export function StatusActions({
   currentStatus: string
 }) {
   const router = useRouter()
+  const [deleting, setDeleting] = useState(false)
 
   async function updateStatus(status: string) {
     await fetch(`/api/jobs/${jobId}`, {
@@ -39,6 +41,13 @@ export function StatusActions({
       body: JSON.stringify({ status }),
     })
     router.refresh()
+  }
+
+  async function handleDelete() {
+    if (!confirm("Delete this job? This cannot be undone.")) return
+    setDeleting(true)
+    await fetch(`/api/jobs/${jobId}`, { method: "DELETE" })
+    router.push("/jobs")
   }
 
   return (
@@ -57,6 +66,13 @@ export function StatusActions({
           </button>
         )
       })}
+      <button
+        onClick={handleDelete}
+        disabled={deleting}
+        className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-red-500 hover:bg-red-500/10 hover:border-red-500/50 transition-colors disabled:opacity-40"
+      >
+        {deleting ? "Deleting…" : "Delete"}
+      </button>
     </div>
   )
 }
