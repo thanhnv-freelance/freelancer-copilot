@@ -23,11 +23,13 @@ const importSchema = z.object({
 function cors(origin: string | null) {
   const allowed =
     origin?.startsWith("chrome-extension://") ||
-    origin?.startsWith("moz-extension://")
+    origin?.startsWith("moz-extension://") ||
+    origin === "https://www.upwork.com"
   return {
     "Access-Control-Allow-Origin": allowed ? origin! : "null",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Private-Network": "true",
   }
 }
 
