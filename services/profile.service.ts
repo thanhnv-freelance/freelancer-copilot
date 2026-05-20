@@ -1,13 +1,18 @@
 import { db } from "@/lib/db"
 import { profiles } from "@/lib/db/schema"
+import type { ExperienceEntry } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { FREELANCER_PROFILE } from "@/lib/scoring/config"
 import type { FreelancerProfile, SkillWeight } from "@/lib/scoring/config"
 
+export type { ExperienceEntry }
+
 export type ProfileData = {
   name: string
+  title: string
   bio: string
   skills: string[]
+  experience: ExperienceEntry[]
   minFixedBudget: number
   minHourlyRate: number
 }
@@ -34,16 +39,20 @@ function toProfileData(row: typeof profiles.$inferSelect | null): ProfileData {
   if (!row) {
     return {
       name: "",
+      title: "",
       bio: "",
       skills: FREELANCER_PROFILE.skills.map((s) => s.name),
+      experience: [],
       minFixedBudget: FREELANCER_PROFILE.minFixedBudget,
       minHourlyRate: FREELANCER_PROFILE.minHourlyRate,
     }
   }
   return {
     name: row.name,
+    title: row.title,
     bio: row.bio,
     skills: (row.skills as string[]) ?? [],
+    experience: (row.experience as ExperienceEntry[]) ?? [],
     minFixedBudget: Number(row.minFixedBudget),
     minHourlyRate: Number(row.minHourlyRate),
   }
@@ -55,8 +64,10 @@ export async function upsertProfile(data: ProfileData): Promise<ProfileData> {
     .values({
       id: "default",
       name: data.name,
+      title: data.title,
       bio: data.bio,
       skills: data.skills,
+      experience: data.experience,
       minFixedBudget: String(data.minFixedBudget),
       minHourlyRate: String(data.minHourlyRate),
       updatedAt: new Date(),
@@ -65,8 +76,10 @@ export async function upsertProfile(data: ProfileData): Promise<ProfileData> {
       target: profiles.id,
       set: {
         name: data.name,
+        title: data.title,
         bio: data.bio,
         skills: data.skills,
+        experience: data.experience,
         minFixedBudget: String(data.minFixedBudget),
         minHourlyRate: String(data.minHourlyRate),
         updatedAt: new Date(),

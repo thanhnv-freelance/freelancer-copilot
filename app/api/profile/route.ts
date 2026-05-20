@@ -10,10 +10,19 @@ export async function GET() {
   return Response.json(profile)
 }
 
+const experienceEntrySchema = z.object({
+  period: z.string().max(50),
+  company: z.string().max(100),
+  location: z.string().max(100),
+  focus: z.string().max(300),
+})
+
 const updateSchema = z.object({
   name: z.string().max(100).optional().default(""),
+  title: z.string().max(200).optional().default(""),
   bio: z.string().max(2000).optional().default(""),
   skills: z.array(z.string().max(60)).max(50),
+  experience: z.array(experienceEntrySchema).max(20).optional().default([]),
   minFixedBudget: z.number().min(0).max(1_000_000),
   minHourlyRate: z.number().min(0).max(10_000),
 })

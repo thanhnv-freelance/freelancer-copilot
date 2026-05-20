@@ -1,0 +1,2 @@
+ALTER TABLE "freelancer_copilot"."profiles" ADD COLUMN "title" text DEFAULT '' NOT NULL;--> statement-breakpoint
+ALTER TABLE "freelancer_copilot"."profiles" ADD COLUMN "experience" jsonb DEFAULT '[]'::jsonb NOT NULL;

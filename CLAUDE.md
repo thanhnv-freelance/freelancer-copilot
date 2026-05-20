@@ -34,13 +34,12 @@ pnpm lint            # ESLint
 pnpm test            # Vitest unit tests
 ```
 
-Database (Drizzle — scripts load `.env` then `.env.local`):
+Database (Drizzle — scripts load `.env`):
 ```bash
-pnpm db:create-schema  # create the freelancer_copilot schema (run once per environment)
-pnpm db:push:dev       # push schema directly (dev only)
-pnpm db:generate       # generate migrations
-pnpm db:migrate        # apply migrations
-pnpm db:studio         # Drizzle Studio UI
+pnpm db:generate  # generate migration file after schema changes
+pnpm db:migrate   # apply pending migrations (dev & production)
+pnpm db:studio    # Drizzle Studio UI
+pnpm db:reset     # wipe and rebuild from scratch (dev only — never run in production)
 ```
 
 ## Architecture

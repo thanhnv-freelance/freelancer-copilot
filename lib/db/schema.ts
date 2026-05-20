@@ -82,11 +82,20 @@ export const leads = schema.table("leads", {
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
+export type ExperienceEntry = {
+  period: string
+  company: string
+  location: string
+  focus: string
+}
+
 export const profiles = schema.table("profiles", {
   id: text("id").primaryKey().default("default"),
   name: text("name").notNull().default(""),
+  title: text("title").notNull().default(""),
   bio: text("bio").notNull().default(""),
   skills: jsonb("skills").$type<string[]>().notNull().default([]),
+  experience: jsonb("experience").$type<ExperienceEntry[]>().notNull().default([]),
   minFixedBudget: numeric("min_fixed_budget").notNull().default("500"),
   minHourlyRate: numeric("min_hourly_rate").notNull().default("30"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
