@@ -83,6 +83,40 @@
 
 ---
 
+## Refactor Round 1 (before LinkedIn extension)
+
+### Validation & Schemas
+* [x] Extract shared base job Zod schema into `lib/validation/job.schema.ts` — reused by `app/api/jobs/route.ts`, `app/api/extension/import/route.ts`, and `app/(dashboard)/jobs/actions.ts`
+* [x] Add Zod validation to `importJobAction` server action (currently does raw `FormData` casts with no validation)
+* [x] Replace hardcoded `"upwork"` default strings with `PlatformValue` from `lib/constants/platforms.ts` (e.g. `actions.ts:33`)
+
+### Service Layer
+* [x] Rewrite `getJobStats()` in `services/job.service.ts` to use SQL `count()` + `groupBy` — currently loads all rows and filters in memory
+
+### Scoring Engine
+* [x] Move hardcoded thresholds from `lib/scoring/engine.ts` into `lib/scoring/config.ts` (e.g. description min length 150, proposal count bands 5/20, spend tiers 1k/10k, rating thresholds 3.5/4.5, hire rate bands 30/70)
+* [x] Wire live profile from DB (`profiles` table) into the scoring engine — already wired via `computeAndSaveScore` → `getProfile()` → `toFreelancerProfile()`
+
+### Extension / CORS
+* [x] Replace hardcoded `"https://www.upwork.com"` in `app/api/extension/import/route.ts` CORS logic with a derived list from `PLATFORMS` constants — `PLATFORM_WEB_ORIGINS` set in `lib/constants/platforms.ts`
+
+### Schema Prep for Multi-Platform
+* [x] Add `platformMeta: jsonb` column to `jobs` table for platform-specific fields (e.g. Upwork `invitesSent`/`hires`/`interviewing`, LinkedIn `easyApply`/`posterTitle`/`connections`) — migration `0005` applied
+* [x] Audit which existing Upwork-specific columns (`lastViewedByClient`, `hires`, `interviewing`, `invitesSent`) can be migrated into `platformMeta` — identified; deferred until LinkedIn data accumulates
+
+---
+
+## Phase 7 — LinkedIn Extension
+
+* [ ] Extend CORS allowed origins to include `linkedin.com`
+* [ ] Build LinkedIn browser extension (content script scrapes job posting + client info)
+* [ ] LinkedIn-specific parse prompt — different fields (poster title, company size, easy apply, applicant count, connection degree)
+* [ ] Adapt scoring engine for LinkedIn signals — no payment verification, no proposal count; use applicant count + connection degree + company size instead
+* [ ] Platform badge + LinkedIn-specific fields on job detail page
+* [ ] E2E test: import a LinkedIn job via extension → score → proposal
+
+---
+
 ## Future
 
 * [x] Reusable assets library (proposal templates, intro messages, architecture writeups, checklists)

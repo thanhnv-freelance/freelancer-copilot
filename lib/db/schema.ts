@@ -41,6 +41,12 @@ export const jobs = schema.table("jobs", {
   paymentVerified: boolean("payment_verified").notNull().default(false),
   source: text("source").notNull().default("upwork"),
   url: text("url"),
+  // Platform-specific metadata that doesn't fit the common columns.
+  // e.g. Upwork: { invitesSent, hires, interviewing, lastViewedByClient, ... }
+  //      LinkedIn: { easyApply, posterTitle, posterCompany, applicantCount, connectionDegree }
+  // Upwork-specific columns (proposalCount, clientJobsPosted, etc.) are candidates
+  // for future migration here once LinkedIn data accumulates.
+  platformMeta: jsonb("platform_meta").$type<Record<string, unknown>>().default({}),
   status: text("status").notNull().default("new"), // "new" | "viewed" | "bookmarked" | "applied" | "skipped"
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

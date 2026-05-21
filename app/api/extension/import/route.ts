@@ -1,40 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createJob } from "@/services/job.service"
 import { computeAndSaveScore } from "@/services/scoring.service"
-import { z } from "zod"
-
-const importSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
-  budgetType: z.enum(["fixed", "hourly"]).default("fixed"),
-  budgetMin: z.string().optional().nullable(),
-  budgetMax: z.string().optional().nullable(),
-  skills: z.array(z.string()).default([]),
-  proposalCount: z.number().int().optional().nullable(),
-  lastViewedByClient: z.string().optional().nullable(),
-  hires: z.number().int().optional().nullable(),
-  interviewing: z.number().int().optional().nullable(),
-  invitesSent: z.number().int().optional().nullable(),
-  clientName: z.string().optional().nullable(),
-  clientLocation: z.string().optional().nullable(),
-  clientRating: z.string().optional().nullable(),
-  clientHireRate: z.string().optional().nullable(),
-  clientTotalSpent: z.string().optional().nullable(),
-  clientJobsPosted: z.number().int().optional().nullable(),
-  clientAvgHourlyRate: z.string().optional().nullable(),
-  clientHours: z.number().int().optional().nullable(),
-  clientIndustry: z.string().optional().nullable(),
-  clientMemberSince: z.string().optional().nullable(),
-  paymentVerified: z.boolean().default(false),
-  url: z.string().optional().nullable(),
-  source: z.string().default("upwork"),
-})
+import { jobSchema } from "@/lib/validation/job.schema"
+import { PLATFORM_WEB_ORIGINS } from "@/lib/constants/platforms"
 
 function cors(origin: string | null) {
   const allowed =
     origin?.startsWith("chrome-extension://") ||
     origin?.startsWith("moz-extension://") ||
-    origin === "https://www.upwork.com"
+    (origin !== null && PLATFORM_WEB_ORIGINS.has(origin))
   return {
     "Access-Control-Allow-Origin": allowed ? origin! : "null",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -62,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const parsed = importSchema.safeParse(body)
+  const parsed = jobSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.flatten() },

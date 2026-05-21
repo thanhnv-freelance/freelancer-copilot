@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { jobs } from "@/lib/db/schema"
-import { and, desc, eq, ilike, or } from "drizzle-orm"
+import { and, count, desc, eq, ilike, or } from "drizzle-orm"
 import type { NewJob } from "@/lib/db/schema"
 
 export type JobFilters = {
@@ -48,13 +48,19 @@ export async function getJobById(id: string) {
 }
 
 export async function getJobStats() {
-  const all = await db.select().from(jobs)
+  const rows = await db
+    .select({ status: jobs.status, count: count() })
+    .from(jobs)
+    .groupBy(jobs.status)
+
+  const byStatus = Object.fromEntries(rows.map((r) => [r.status, r.count]))
+
   return {
-    total: all.length,
-    new: all.filter((j) => j.status === "new").length,
-    bookmarked: all.filter((j) => j.status === "bookmarked").length,
-    applied: all.filter((j) => j.status === "applied").length,
-    skipped: all.filter((j) => j.status === "skipped").length,
+    total: rows.reduce((sum, r) => sum + r.count, 0),
+    new: byStatus["new"] ?? 0,
+    bookmarked: byStatus["bookmarked"] ?? 0,
+    applied: byStatus["applied"] ?? 0,
+    skipped: byStatus["skipped"] ?? 0,
   }
 }
 

@@ -1,0 +1,1 @@
+ALTER TABLE "freelancer_copilot"."jobs" ADD COLUMN "platform_meta" jsonb DEFAULT '{}'::jsonb;

@@ -1,5 +1,5 @@
 import type { Job } from "@/lib/db/schema"
-import { FREELANCER_PROFILE } from "./config"
+import { FREELANCER_PROFILE, SCORING_THRESHOLDS } from "./config"
 import type { FreelancerProfile } from "./config"
 
 export interface ReasoningItem {
@@ -105,7 +105,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
 
   // 3. Proposal competition
   if (job.proposalCount !== null && job.proposalCount !== undefined) {
-    if (job.proposalCount <= 5) {
+    if (job.proposalCount <= SCORING_THRESHOLDS.lowCompetitionMax) {
       const delta = 15
       score += delta
       reasoning.push({
@@ -113,7 +113,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
         delta,
         note: `Low competition: only ${job.proposalCount} proposals`,
       })
-    } else if (job.proposalCount > 20) {
+    } else if (job.proposalCount > SCORING_THRESHOLDS.highCompetitionMin) {
       const delta = -10
       score += delta
       reasoning.push({
@@ -146,7 +146,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
   // 5. Client rating
   if (job.clientRating) {
     const rating = Number(job.clientRating)
-    if (rating >= 4.5) {
+    if (rating >= SCORING_THRESHOLDS.ratingExcellentMin) {
       const delta = 10
       score += delta
       reasoning.push({
@@ -154,7 +154,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
         delta,
         note: `Excellent client rating: ${rating}/5`,
       })
-    } else if (rating < 3.5) {
+    } else if (rating < SCORING_THRESHOLDS.ratingPoorMax) {
       const delta = -10
       score += delta
       reasoning.push({
@@ -168,7 +168,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
   // 6. Client hire rate
   if (job.clientHireRate) {
     const hireRate = Number(job.clientHireRate)
-    if (hireRate >= 70) {
+    if (hireRate >= SCORING_THRESHOLDS.hireRateHighMin) {
       const delta = 5
       score += delta
       reasoning.push({
@@ -176,7 +176,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
         delta,
         note: `High hire rate: ${hireRate}%`,
       })
-    } else if (hireRate < 30) {
+    } else if (hireRate < SCORING_THRESHOLDS.hireRateLowMax) {
       const delta = -5
       score += delta
       reasoning.push({
@@ -190,7 +190,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
   // 7. Client total spent
   if (job.clientTotalSpent !== null && job.clientTotalSpent !== undefined) {
     const spent = Number(job.clientTotalSpent)
-    if (spent >= 10000) {
+    if (spent >= SCORING_THRESHOLDS.spendProvenMin) {
       const delta = 10
       score += delta
       reasoning.push({
@@ -198,7 +198,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
         delta,
         note: `$${spent.toLocaleString()} total spent — proven client`,
       })
-    } else if (spent >= 1000) {
+    } else if (spent >= SCORING_THRESHOLDS.spendSomeHistoryMin) {
       const delta = 5
       score += delta
       reasoning.push({
@@ -230,7 +230,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
     })
     riskFlags.push("Vague or unclear scope language")
   }
-  if (job.description.length < 150) {
+  if (job.description.length < SCORING_THRESHOLDS.minDescriptionLength) {
     const delta = -10
     score += delta
     reasoning.push({
@@ -245,7 +245,7 @@ export function scoreJob(job: Job, profile?: FreelancerProfile): ScoreResult {
   const noSpend =
     job.clientTotalSpent === null ||
     job.clientTotalSpent === undefined ||
-    Number(job.clientTotalSpent) < 100
+    Number(job.clientTotalSpent) < SCORING_THRESHOLDS.spendNewClientMax
   if (!job.paymentVerified && noSpend) {
     const delta = -10
     score += delta
