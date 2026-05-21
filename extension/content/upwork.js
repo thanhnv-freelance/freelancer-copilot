@@ -108,7 +108,14 @@ function extractJob() {
     document.querySelector('[data-test="job-description-text"]')
 
   const rawDescText = descEl?.innerText?.trim() ?? ""
-  const { description, skills: extractedSkills } = splitDescriptionAndSkills(rawDescText)
+
+  // Extract skills from the dedicated "Skills and Expertise" section first
+  const domSkills = Array.from(document.querySelectorAll(".skills-list .air3-line-clamp"))
+    .map((el) => el.textContent?.trim())
+    .filter(Boolean)
+
+  const { description, skills: heuristicSkills } = splitDescriptionAndSkills(rawDescText)
+  const extractedSkills = domSkills.length > 0 ? domSkills : heuristicSkills
 
   const jobTypeEl = document.querySelector('[data-test="job-type"]')
   const budgetEl = document.querySelector('[data-test="budget"]')
@@ -128,24 +135,61 @@ function extractJob() {
     budgetMax = b.budgetMax
   }
 
+  // Activity on this job
+  function getActivityText(label) {
+    for (const item of document.querySelectorAll(".ca-item")) {
+      const title = item.querySelector(".title")
+      if (!title?.textContent?.toLowerCase().includes(label.toLowerCase())) continue
+      const clone = item.cloneNode(true)
+      clone.querySelector(".title")?.remove()
+      clone.querySelectorAll(".help-icon, [data-test='popper']").forEach((el) => el.remove())
+      return clone.textContent?.trim() || null
+    }
+    return null
+  }
+  function getActivityNum(label) {
+    const text = getActivityText(label)
+    if (!text) return null
+    const m = text.match(/(\d+)/)
+    return m ? parseInt(m[1]) : null
+  }
+
+  // Proposals — read from activity section (handles "50+"), fallback to proposals-section
   let proposalCount = null
-  const propSection = document.querySelector('[data-test="proposals-section"]')
-  if (propSection) {
-    const t = propSection.textContent || ""
-    const m = t.match(/(\d+)\s*to\s*(\d+)/i)
-    if (m) proposalCount = Math.round((parseInt(m[1]) + parseInt(m[2])) / 2)
-    else {
-      const s = t.match(/(\d+)\s*proposal/i)
-      if (s) proposalCount = parseInt(s[1])
+  const proposalText = getActivityText("Proposals")
+  if (proposalText) {
+    const m = proposalText.match(/(\d+)/)
+    if (m) proposalCount = parseInt(m[1])
+  } else {
+    const propSection = document.querySelector('[data-test="proposals-section"]')
+    if (propSection) {
+      const t = propSection.textContent || ""
+      const m = t.match(/(\d+)\s*to\s*(\d+)/i)
+      if (m) proposalCount = Math.round((parseInt(m[1]) + parseInt(m[2])) / 2)
+      else {
+        const s = t.match(/(\d+)/)
+        if (s) proposalCount = parseInt(s[1])
+      }
     }
   }
 
+  const lastViewedByClient = getActivityText("Last viewed by client")
+  const hires = getActivityNum("Hires")
+  const interviewing = getActivityNum("Interviewing")
+  const invitesSent = getActivityNum("Invites sent")
+
+  // About the client
   const clientContainer = document.querySelector('[data-test="about-client-container"]')
   let paymentVerified = false
   let clientRating = null
   let clientHireRate = null
   let clientTotalSpent = null
   let clientLocation = null
+  let clientJobsPosted = null
+  let clientAvgHourlyRate = null
+  let clientHours = null
+  let clientIndustry = null
+  let clientMemberSince = null
 
   if (clientContainer) {
     paymentVerified = !!clientContainer.querySelector(".payment-verified")
@@ -160,8 +204,11 @@ function extractJob() {
 
     const statsEl = clientContainer.querySelector('[data-qa="client-job-posting-stats"]')
     if (statsEl) {
-      const sm = statsEl.textContent?.match(/(\d+)%\s*hire\s*rate/i)
-      if (sm) clientHireRate = sm[1]
+      const statsText = statsEl.textContent || ""
+      const hm = statsText.match(/(\d+)%\s*hire\s*rate/i)
+      if (hm) clientHireRate = hm[1]
+      const jm = statsText.match(/(\d+)\s*jobs?\s*posted/i)
+      if (jm) clientJobsPosted = parseInt(jm[1])
     }
 
     const spentEl =
@@ -177,6 +224,28 @@ function extractJob() {
         locEl.textContent?.replace(/\d{1,2}:\d{2}\s*(AM|PM)?/i, "").trim() ??
         null
     }
+
+    const hourlyRateEl = clientContainer.querySelector('[data-qa="client-hourly-rate"]')
+    if (hourlyRateEl) {
+      const rm = (hourlyRateEl.textContent || "").match(/\$([\d,.]+)/)
+      if (rm) clientAvgHourlyRate = rm[1].replace(/,/g, "")
+    }
+
+    const hoursEl = clientContainer.querySelector('[data-qa="client-hours"]')
+    if (hoursEl) {
+      const hm = (hoursEl.textContent || "").match(/(\d[\d,]*)/)
+      if (hm) clientHours = parseInt(hm[1].replace(/,/g, ""))
+    }
+
+    const industryEl = clientContainer.querySelector('[data-qa="client-company-profile-industry"]')
+    if (industryEl) {
+      clientIndustry = industryEl.firstChild?.textContent?.trim() || industryEl.textContent?.trim().split("\n")[0]?.trim() || null
+    }
+
+    const memberEl = clientContainer.querySelector('[data-qa="client-contract-date"]')
+    if (memberEl) {
+      clientMemberSince = memberEl.textContent?.replace(/member\s*since/i, "").trim() || null
+    }
   }
 
   return {
@@ -187,10 +256,20 @@ function extractJob() {
     budgetMin,
     budgetMax,
     proposalCount,
-    clientName: clientLocation,
+    lastViewedByClient,
+    hires,
+    interviewing,
+    invitesSent,
+    clientName: null,
+    clientLocation,
     clientRating,
     clientHireRate,
     clientTotalSpent,
+    clientJobsPosted,
+    clientAvgHourlyRate,
+    clientHours,
+    clientIndustry,
+    clientMemberSince,
     paymentVerified,
     url: url.startsWith("http") ? url : window.location.href,
     source: "upwork",

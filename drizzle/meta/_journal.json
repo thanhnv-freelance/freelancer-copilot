@@ -15,6 +15,27 @@
       "when": 1779293461034,
       "tag": "0001_aromatic_tiger_shark",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779323308453,
+      "tag": "0002_ambitious_banshee",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779323949061,
+      "tag": "0003_nappy_hex",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1779324978621,
+      "tag": "0004_dapper_rhino",
+      "breakpoints": true
     }
   ]
 }
